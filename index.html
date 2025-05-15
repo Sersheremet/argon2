@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>AES Шифрування</title>
+  <meta name="theme-color" content="#0080ff">
+  <link rel="manifest" href="manifest.json">
+  <style>
+    button {
+      font-size: 1.5em;
+      padding: 1em;
+    }
+    input, textarea {
+      font-size: 1.2em;
+    }
+    
+    body { font-family: sans-serif; padding: 1em; max-width: 500px; margin: auto; }
+    textarea { width: 100%; height: 100px; }
+    input, button { margin: 0.5em 0; width: 100%; }
+    .small { font-size: 0.9em; color: gray; }
+  </style>
+</head>
+<body>
+  <h2>🔐 AES Шифрування повідомлень</h2>
+
+  <label>Пароль:</label>
+  <input type="password" id="password">
+
+  <label>Текст або шифрований текст:</label>
+  <textarea id="plainText"></textarea>
+
+  <button onclick="encrypt()">Зашифрувати</button>
+  <button onclick="decrypt()">Розшифрувати</button>
+
+  <h3>Результат:</h3>
+  <textarea id="result" readonly></textarea>
+  <button onclick="copyResult()">📋 Копіювати результат</button>
+  <div id="copyMsg" class="small"></div>
+
+  <script>
+    async function getKey(password, salt) {
+      const enc = new TextEncoder();
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]
+      );
+      return crypto.subtle.deriveKey(
+        {
+          name: "PBKDF2",
+          salt: salt,
+          iterations: 100000,
+          hash: "SHA-256"
+        },
+        keyMaterial,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt", "decrypt"]
+      );
+    }
+
+    async function encrypt() {
+      const enc = new TextEncoder();
+      const password = document.getElementById("password").value;
+      const plainText = document.getElementById("plainText").value;
+
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const key = await getKey(password, salt);
+      const encrypted = await crypto.subtle.encrypt(
+        { name: "AES-GCM", iv: iv },
+        key,
+        enc.encode(plainText)
+      );
+
+      const encryptedArray = new Uint8Array(encrypted);
+      const fullMessage = new Uint8Array(salt.byteLength + iv.byteLength + encryptedArray.byteLength);
+      fullMessage.set(salt, 0);
+      fullMessage.set(iv, salt.byteLength);
+      fullMessage.set(encryptedArray, salt.byteLength + iv.byteLength);
+
+      const base64 = btoa(String.fromCharCode(...fullMessage));
+      document.getElementById("result").value = base64;
+      document.getElementById("copyMsg").textContent = '';
+    }
+
+    async function decrypt() {
+      const dec = new TextDecoder();
+      const password = document.getElementById("password").value;
+      const base64 = document.getElementById("plainText").value;
+      const data = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+
+      const salt = data.slice(0, 16);
+      const iv = data.slice(16, 28);
+      const encrypted = data.slice(28);
+      const key = await getKey(password, salt);
+
+      try {
+        const decrypted = await crypto.subtle.decrypt(
+          { name: "AES-GCM", iv: iv },
+          key,
+          encrypted
+        );
+        document.getElementById("result").value = dec.decode(decrypted);
+        document.getElementById("copyMsg").textContent = '';
+      } catch (e) {
+        document.getElementById("result").value = "❌ Невірний пароль або пошкоджені дані.";
+      }
+    }
+
+    function copyResult() {
+      const resultText = document.getElementById("result");
+      navigator.clipboard.writeText(resultText.value)
+        .then(() => {
+          document.getElementById("copyMsg").textContent = "✅ Скопійовано!";
+        })
+        .catch(() => {
+          document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
+        });
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>
