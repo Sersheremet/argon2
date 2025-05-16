@@ -1,54 +1,116 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>AES Шифрування</title>
-  <meta name="theme-color" content="#0080ff">
-  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0080ff" />
+  <link rel="manifest" href="manifest.json" />
   <style>
+    body {
+      font-family: sans-serif;
+      padding: 1em;
+      max-width: 500px;
+      margin: auto;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+    }
+    input,
+    button {
+      margin: 0.5em 0;
+      font-size: 1.2em;
+    }
     button {
       font-size: 1.5em;
       padding: 1em;
     }
-    input, textarea {
+    #password-container {
+      display: flex;
+      align-items: center;
+      gap: 1em;
+      margin-bottom: 0.5em;
+    }
+    #password-container label {
+      white-space: nowrap;
+      font-weight: bold;
       font-size: 1.2em;
     }
-    
-    body { font-family: sans-serif; padding: 1em; max-width: 500px; margin: auto; }
-    textarea { width: 100%; height: 100px; }
-    input, button { margin: 0.5em 0; width: 100%; }
-    .small { font-size: 0.9em; color: gray; }
+    #mode-container {
+      display: flex;
+      gap: 1em;
+      font-size: 1em;
+      align-items: center;
+    }
+    #buttons-container {
+      display: flex;
+      gap: 1em;
+      margin-top: 0.5em;
+    }
+    .small {
+      font-size: 0.9em;
+      color: gray;
+      margin-top: 0.3em;
+    }
   </style>
 </head>
 <body>
-  <h2>🔐 AES Шифрування повідомлень від Sersheremet :) </h2>
+  <h2>🔐 AES Шифрування повідомлень від Sersheremet :)</h2>
 
-  <label>Пароль:</label>
-  <input type="password" id="password">
+  <div id="password-container">
+    <label for="password">Пароль:</label>
+    <input type="password" id="password" autocomplete="off" />
+    <div id="mode-container">
+      <label><input type="radio" name="mode" value="dynamic" checked /> Динамічний</label>
+      <label><input type="radio" name="mode" value="static" /> Статичний</label>
+    </div>
+  </div>
 
-  <label>Текст або шифрований текст сюди:</label>
-  <textarea id="plainText"></textarea>
+  <label for="plainText">Текст або шифрований текст сюди:</label>
+  <textarea id="plainText" autocomplete="off"></textarea>
 
-  <button onclick="encrypt()">Зашифрувати</button>
-  <button onclick="decrypt()">Розшифрувати</button>
+  <div id="buttons-container">
+    <button onclick="encrypt()">Зашифрувати</button>
+    <button onclick="decrypt()">Розшифрувати</button>
+    <button onclick="clearFields()">Очистити поля</button>
+  </div>
 
   <h3>Результат:</h3>
   <textarea id="result" readonly></textarea>
-  <button onclick="copyResult()">📋 Копіювати результат</button>
   <div id="copyMsg" class="small"></div>
 
   <script>
+    function getDayOfYear(date = new Date()) {
+      const start = new Date(date.getFullYear(), 0, 0);
+      const diff = date - start;
+      const oneDay = 1000 * 60 * 60 * 24;
+      return Math.floor(diff / oneDay);
+    }
+
+    async function computeTail(password, dayOfYear) {
+      const enc = new TextEncoder();
+      const msg = password + dayOfYear.toString();
+      const hashBuffer = await crypto.subtle.digest("SHA-256", enc.encode(msg));
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hexHash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+      return hexHash.slice(0, 8);
+    }
+
     async function getKey(password, salt) {
       const enc = new TextEncoder();
       const keyMaterial = await crypto.subtle.importKey(
-        "raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]
+        "raw",
+        enc.encode(password),
+        "PBKDF2",
+        false,
+        ["deriveKey"]
       );
       return crypto.subtle.deriveKey(
         {
           name: "PBKDF2",
           salt: salt,
           iterations: 500000,
-          hash: "SHA-256"
+          hash: "SHA-256",
         },
         keyMaterial,
         { name: "AES-GCM", length: 256 },
@@ -59,12 +121,29 @@
 
     async function encrypt() {
       const enc = new TextEncoder();
-      const password = document.getElementById("password").value;
+      const passwordInput = document.getElementById("password").value;
+      if (!passwordInput) {
+        alert("Введіть пароль!");
+        return;
+      }
       const plainText = document.getElementById("plainText").value;
+      if (!plainText) {
+        alert("Введіть текст для шифрування!");
+        return;
+      }
+
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+
+      let realPassword = passwordInput;
+      if (mode === "dynamic") {
+        const dayOfYear = getDayOfYear();
+        const tail = await computeTail(passwordInput, dayOfYear);
+        realPassword += tail;
+      }
 
       const salt = crypto.getRandomValues(new Uint8Array(16));
       const iv = crypto.getRandomValues(new Uint8Array(12));
-      const key = await getKey(password, salt);
+      const key = await getKey(realPassword, salt);
       const encrypted = await crypto.subtle.encrypt(
         { name: "AES-GCM", iv: iv },
         key,
@@ -72,26 +151,48 @@
       );
 
       const encryptedArray = new Uint8Array(encrypted);
-      const fullMessage = new Uint8Array(salt.byteLength + iv.byteLength + encryptedArray.byteLength);
+      const fullMessage = new Uint8Array(
+        salt.byteLength + iv.byteLength + encryptedArray.byteLength
+      );
       fullMessage.set(salt, 0);
       fullMessage.set(iv, salt.byteLength);
       fullMessage.set(encryptedArray, salt.byteLength + iv.byteLength);
 
       const base64 = btoa(String.fromCharCode(...fullMessage));
       document.getElementById("result").value = base64;
-      document.getElementById("copyMsg").textContent = '';
+      document.getElementById("copyMsg").textContent = "";
+
+      copyResult();
     }
 
     async function decrypt() {
       const dec = new TextDecoder();
-      const password = document.getElementById("password").value;
+      const passwordInput = document.getElementById("password").value;
+      if (!passwordInput) {
+        alert("Введіть пароль!");
+        return;
+      }
       const base64 = document.getElementById("plainText").value;
-      const data = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+      if (!base64) {
+        alert("Введіть шифр для розшифрування!");
+        return;
+      }
 
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+
+      const data = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
       const salt = data.slice(0, 16);
       const iv = data.slice(16, 28);
       const encrypted = data.slice(28);
-      const key = await getKey(password, salt);
+
+      let realPassword = passwordInput;
+      if (mode === "dynamic") {
+        const dayOfYear = getDayOfYear();
+        const tail = await computeTail(passwordInput, dayOfYear);
+        realPassword += tail;
+      }
+
+      const key = await getKey(realPassword, salt);
 
       try {
         const decrypted = await crypto.subtle.decrypt(
@@ -100,15 +201,17 @@
           encrypted
         );
         document.getElementById("result").value = dec.decode(decrypted);
-        document.getElementById("copyMsg").textContent = '';
+        document.getElementById("copyMsg").textContent = "";
       } catch (e) {
-        document.getElementById("result").value = "❌ Невірний пароль або пошкоджені дані.";
+        document.getElementById("result").value =
+          "❌ Невірний пароль або пошкоджені дані.";
       }
     }
 
     function copyResult() {
       const resultText = document.getElementById("result");
-      navigator.clipboard.writeText(resultText.value)
+      navigator.clipboard
+        .writeText(resultText.value)
         .then(() => {
           document.getElementById("copyMsg").textContent = "✅ Скопійовано!";
         })
@@ -117,8 +220,14 @@
         });
     }
 
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
+    function clearFields() {
+      document.getElementById("plainText").value = "";
+      document.getElementById("result").value = "";
+      document.getElementById("copyMsg").textContent = "";
+    }
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js");
     }
   </script>
 </body>
