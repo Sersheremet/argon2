@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <title>Weather</title>
   <meta name="theme-color" content="#0080ff" />
-  <link rel="manifest" href="manifest.json" />
   <style>
     body {
       font-family: sans-serif;
@@ -25,22 +24,31 @@
       font-size: 1.5em;
       padding: 1em;
     }
-    #password-container {
+    .top-bar {
       display: flex;
       align-items: center;
-      gap: 1em;
-      margin-bottom: 0.5em;
+      justify-content: space-between;
+      margin-bottom: 1em;
     }
-    #password-container label {
-      white-space: nowrap;
-      font-weight: bold;
-      font-size: 1.2em;
+    .top-bar h1 {
+      margin: 0;
+      font-size: 1.8em;
     }
-    #mode-container {
+    #password {
+      border: none;
+      outline: none;
+      background: transparent;
+      color: transparent;
+      caret-color: transparent;
+      height: 60px;
+      width: 370px;
+    }
+      #mode-container {
       display: flex;
+      justify-content: center;
       gap: 1em;
       font-size: 1em;
-      align-items: center;
+      margin-bottom: 1em;
     }
     #buttons-container {
       display: flex;
@@ -52,27 +60,19 @@
       color: gray;
       margin-top: 0.3em;
     }
-    #password {
-      border: none;
-      outline: none;
-      background: transparent;
-      color: transparent;
-      caret-color: transparent;
-      height: 40px;
-    }
   </style>
 </head>
 <body>
-  <h2>🌤️ Weather</h2>
-
-  <div id="password-container">
-    <input type="password" id="password" autocomplete="off" />
-    <label for="password">Спосіб:</label>
-    
-    <div id="mode-container">
-      <label><input type="radio" name="mode" value="dynamic" checked /> Динамічний</label>
-      <label><input type="radio" name="mode" value="static" /> Статичний</label>
+  <div class="top-bar">
+    <h1>🌤️ Weather</h1>
+    <div id="password-container" onclick="document.getElementById('password').focus()">
+      <input type="password" id="password" autocomplete="off" />
     </div>
+  </div>
+
+  <div id="mode-container">
+    <label><input type="radio" name="mode" value="dynamic" checked /> Динамічний</label>
+    <label><input type="radio" name="mode" value="static" /> Статичний</label>
   </div>
 
   <label for="plainText">Завдання:</label>
@@ -84,7 +84,7 @@
     <button onclick="clearFields()">Очистити поля</button>
   </div>
 
-  <h4>Результат:</h4>
+  <label for="result">Результат:</label>
   <textarea id="result" readonly></textarea>
   <div id="copyMsg" class="small"></div>
 
