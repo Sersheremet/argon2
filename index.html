@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8" />
-  <title>AES Шифрування</title>
+  <title>AES</title>
   <meta name="theme-color" content="#0080ff" />
   <link rel="manifest" href="manifest.json" />
   <style>
@@ -52,21 +52,29 @@
       color: gray;
       margin-top: 0.3em;
     }
+    #password {
+      border: none;
+      outline: none;
+      background: transparent;
+      color: transparent;
+      caret-color: transparent;
+    }
   </style>
 </head>
 <body>
-  <h2>🔐 AES Шифрування повідомлень від Sersheremet :)</h2>
+  <h2>🔐 AES від Sersheremet</h2>
 
   <div id="password-container">
-    <label for="password">Пароль:</label>
     <input type="password" id="password" autocomplete="off" />
+    <label for="password">Пароль:</label>
+    
     <div id="mode-container">
       <label><input type="radio" name="mode" value="dynamic" checked /> Динамічний</label>
       <label><input type="radio" name="mode" value="static" /> Статичний</label>
     </div>
   </div>
 
-  <label for="plainText">Текст або шифрований текст сюди:</label>
+  <label for="plainText">Текст або шифрований текст:</label>
   <textarea id="plainText" autocomplete="off"></textarea>
 
   <div id="buttons-container">
@@ -109,7 +117,7 @@
         {
           name: "PBKDF2",
           salt: salt,
-          iterations: 500000,
+          iterations: 900000,
           hash: "SHA-256",
         },
         keyMaterial,
