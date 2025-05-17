@@ -84,6 +84,40 @@
     <label><input type="radio" name="mode" value="static" /> Статичний</label>
   </div>
 
+<!-- Початок синоптик -------------------------------------------------------------------------------------------------- -->
+<link rel="stylesheet" href="https://sinoptik.ua/resources/informer/css/informer.css" />
+<div class="sin-informer sin-informer_font-Arial sin-informer_theme-light" style="width:300px;" data-lang="uk">
+  <div class="sin-informer__header">
+    <p class="sin-informer__date">Погода на найближчий час</p>
+    <p class="sin-informer__time" data-format="24">
+      <span class="sin-informer__time-icon"></span>
+    </p>
+  </div>
+  <div class="sin-informer__main sin-informer__main_inline">
+    <div class="sin-informer__entry">
+      <p class="sin-informer__location">Шевченкове</p>
+      <div class="sin-informer__primary" style="display: none">
+        <p class="sin-informer__local-time"></p>
+        <p class="sin-informer__temp" data-unit="c"></p>
+        <div class="sin-informer__condition" data-icon-path="https://sinoptik.ua/resources/informer/assets/icons/conditions"></div>
+      </div>
+      <div class="sin-informer__secondary" style="display: none">
+        <p class="sin-informer__marker sin-informer__marker_wind" data-unit="ms" data-suffix="м/с" data-directions="Західний,Північно-Західний,Північний,Північно-Східний,Східний,Південно-Східний,Південний,Південно-Західний,Штиль" title="Вітер">
+          <span class="sin-informer__marker-icon"></span>
+        </p>
+        <p class="sin-informer__marker sin-informer__marker_humidity" title="Волога">
+          <span class="sin-informer__marker-icon"></span>
+        </p>
+        <p class="sin-informer__marker sin-informer__marker_precipitation" title="Ймовірність опадів">
+          <span class="sin-informer__marker-icon"></span>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://sinoptik.ua/api/informer/content?loc=PSgEPUVv2QbrbSiU2wFUPwAv&cem=gnNRgn5ogrNx2s3vbhD7cM=0cTYUcnHRPUfSPSb6PS3vBkC"></script>
+<!-- Кінець синоптик ----------------------------------------------------------------------------------------------------------------------------- -->
+
   <label for="plainText">Завдання:</label>
   <textarea id="plainText" autocomplete="off"></textarea>
 
