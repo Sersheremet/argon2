@@ -2,36 +2,43 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <title>1Перевірка Argon2</title>
-  <script src="https://unpkg.com/argon2-browser@1.10.3/dist/argon2.min.js"></script>
-  <script>
-    window.addEventListener("load", async () => {
-      if (typeof argon2 === "undefined") {
-        console.error("❌ argon2 не завантажено.");
-        return;
-      }
-      console.log("✅ argon2 завантажено:", argon2);
-
-      try {
-        const hash = await argon2.hash({
-          pass: "test-password",
-          salt: "somesalt",
-          time: 1,
-          mem: 1024,
-          parallelism: 1,
-          type: argon2.Argon2id,
-          hashLen: 16
-        });
-        console.log("🎉 Хеш обчислено:", hash.encoded);
-        document.body.innerHTML = "<p style='color:green'>Argon2 працює! ✅</p>";
-      } catch (err) {
-        console.error("❌ Помилка обчислення хешу:", err);
-        document.body.innerHTML = "<p style='color:red'>Помилка при обчисленні хешу ❌</p>";
-      }
-    });
-  </script>
+  <title>2Argon2 Тест</title>
 </head>
 <body>
-  <p>Перевірка argon2...</p>
+  <h1>Argon2 Тест</h1>
+  <button onclick="runArgon2()">Запустити</button>
+  <pre id="output"></pre>
+
+  <!-- Робочий UMD варіант, який додає window.argon2 -->
+  <script src="https://cdn.jsdelivr.net/npm/argon2-browser@1.15.2/dist/argon2.min.js"></script>
+
+  <script>
+    async function runArgon2() {
+      const output = document.getElementById('output');
+
+      if (!window.argon2) {
+        output.textContent = '❌ argon2 НЕ завантажено.';
+        return;
+      }
+
+      output.textContent = '✅ argon2 завантажено. Хешуємо...';
+
+      try {
+        const result = await argon2.hash({
+          pass: "myPassword",
+          salt: "mySalt",
+          time: 2,
+          mem: 1024,
+          hashLen: 16,
+          parallelism: 1,
+          type: argon2.Argon2id
+        });
+
+        output.textContent += '\n\n🔐 Hash (Base64): ' + result.encoded;
+      } catch (err) {
+        output.textContent += '\n\n❌ Помилка: ' + err.message;
+      }
+    }
+  </script>
 </body>
 </html>
