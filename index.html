@@ -73,7 +73,7 @@
 </head>
 <body>
   <div class="top-bar">
-    <h1>🌤️ Weather12</h1>
+    <h1>🌤️ Weather13</h1>
     <div id="password-container" onclick="document.getElementById('password').focus()">
       <input type="password" id="password" autocomplete="off" />
     </div>
@@ -84,7 +84,7 @@
     <label><input type="radio" name="mode" value="static" /> Статичний</label>
   </div>
 
-  <!-- Початок синоптик 
+  <!-- Sinoptik закоментований
   <link rel="stylesheet" href="https://sinoptik.ua/resources/informer/css/informer.css" />
   <div class="sin-informer sin-informer_font-Arial sin-informer_theme-light" style="width:300px;" data-lang="uk">
     <div class="sin-informer__header">
@@ -116,7 +116,7 @@
     </div>
   </div>
   <script defer src="https://sinoptik.ua/api/informer/content?loc=PSgEPUVv2QbrbSiU2wFUPwAv&cem=gnNRgn5ogrNx2s3vbhD7cM=0cTYUcnHRPUfSPSb6PS3vBkC"></script>
-   Кінець синоптик -->
+  -->
 
   <label for="plainText">Завдання:</label>
   <textarea id="plainText" autocomplete="off"></textarea>
@@ -219,58 +219,58 @@
 
       const endTime = performance.now();
       const duration = ((endTime - startTime) / 1000).toFixed(3);
-      const result = document.getElementById("result");
-      if (result.value) {
+      const resultText = document.getElementById("result").value;
+      if (resultText) {
         setTimeout(() => {
           if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(result.value).then(() => {
+            navigator.clipboard.writeText(resultText).then(() => {
               document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
             }).catch((e) => {
-              console.error("Помилка navigator.clipboard:", e);
-              // Резервний метод: document.execCommand
+              console.error("Помилка navigator.clipboard:", e.message, e.stack);
+              // Резервний метод: document.execCommand із textarea
               try {
-                const tempInput = document.createElement("input");
-                tempInput.style.position = "absolute";
-                tempInput.style.left = "-9999px";
-                tempInput.value = result.value;
-                document.body.appendChild(tempInput);
-                tempInput.focus();
-                tempInput.select();
+                const tempTextarea = document.createElement("textarea");
+                tempTextarea.style.position = "absolute";
+                tempTextarea.style.left = "-9999px";
+                tempTextarea.value = resultText;
+                document.body.appendChild(tempTextarea);
+                tempTextarea.focus();
+                tempTextarea.select();
                 const success = document.execCommand("copy");
-                document.body.removeChild(tempInput);
+                document.body.removeChild(tempTextarea);
                 if (success) {
                   document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
                 } else {
                   throw new Error("execCommand failed");
                 }
               } catch (e2) {
-                console.error("Помилка execCommand:", e2);
+                console.error("Помилка execCommand:", e2.message, e2.stack);
                 document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
               }
             });
           } else {
             // Резервний метод для старих браузерів
             try {
-              const tempInput = document.createElement("input");
-              tempInput.style.position = "absolute";
-              tempInput.style.left = "-9999px";
-              tempInput.value = result.value;
-              document.body.appendChild(tempInput);
-              tempInput.focus();
-              tempInput.select();
+              const tempTextarea = document.createElement("textarea");
+              tempTextarea.style.position = "absolute";
+              tempTextarea.style.left = "-9999px";
+              tempTextarea.value = resultText;
+              document.body.appendChild(tempTextarea);
+              tempTextarea.focus();
+              tempTextarea.select();
               const success = document.execCommand("copy");
-              document.body.appendChild(tempInput);
+              document.body.removeChild(tempTextarea);
               if (success) {
                 document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
               } else {
                 throw new Error("execCommand failed");
               }
             } catch (e3) {
-              console.error("Помилка execCommand:", e3);
+              console.error("Помилка execCommand:", e3.message, e3.stack);
               document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
             }
           }
-        }, 200); // Затримка 200 мс
+        }, 500); // Затримка 500 мс
       } else {
         document.getElementById("copyMsg").textContent = "Немає даних для копіювання";
       }
@@ -314,58 +314,57 @@
         document.getElementById("result").value = resultText;
         const endTime = performance.now();
         const duration = ((endTime - startTime) / 1000).toFixed(3);
-        const result = document.getElementById("result");
-        if (result.value) {
+        if (resultText) {
           setTimeout(() => {
             if (navigator.clipboard && navigator.clipboard.writeText) {
-              navigator.clipboard.writeText(result.value).then(() => {
+              navigator.clipboard.writeText(resultText).then(() => {
                 document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
               }).catch((e) => {
-                console.error("Помилка navigator.clipboard:", e);
-                // Резервний метод: document.execCommand
+                console.error("Помилка navigator.clipboard:", e.message, e.stack);
+                // Резервний метод: document.execCommand із textarea
                 try {
-                  const tempInput = document.createElement("input");
-                  tempInput.style.position = "absolute";
-                  tempInput.style.left = "-9999px";
-                  tempInput.value = result.value;
-                  document.body.appendChild(tempInput);
-                  tempInput.focus();
-                  tempInput.select();
+                  const tempTextarea = document.createElement("textarea");
+                  tempTextarea.style.position = "absolute";
+                  tempTextarea.style.left = "-9999px";
+                  tempTextarea.value = resultText;
+                  document.body.appendChild(tempTextarea);
+                  tempTextarea.focus();
+                  tempTextarea.select();
                   const success = document.execCommand("copy");
-                  document.body.removeChild(tempInput);
+                  document.body.removeChild(tempTextarea);
                   if (success) {
                     document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
                   } else {
                     throw new Error("execCommand failed");
                   }
                 } catch (e2) {
-                  console.error("Помилка execCommand:", e2);
+                  console.error("Помилка execCommand:", e2.message, e2.stack);
                   document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
                 }
               });
             } else {
               // Резервний метод для старих браузерів
               try {
-                const tempInput = document.createElement("input");
-                tempInput.style.position = "absolute";
-                tempInput.style.left = "-9999px";
-                tempInput.value = result.value;
-                document.body.appendChild(tempInput);
-                tempInput.focus();
-                tempInput.select();
+                const tempTextarea = document.createElement("textarea");
+                tempTextarea.style.position = "absolute";
+                tempTextarea.style.left = "-9999px";
+                tempTextarea.value = resultText;
+                document.body.appendChild(tempTextarea);
+                tempTextarea.focus();
+                tempTextarea.select();
                 const success = document.execCommand("copy");
-                document.body.removeChild(tempInput);
+                document.body.removeChild(tempTextarea);
                 if (success) {
                   document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
                 } else {
                   throw new Error("execCommand failed");
                 }
               } catch (e3) {
-                console.error("Помилка execCommand:", e3);
+                console.error("Помилка execCommand:", e3.message, e3.stack);
                 document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
               }
             }
-          }, 200); // Затримка 200 мс
+          }, 500); // Затримка 500 мс
         } else {
           document.getElementById("copyMsg").textContent = "Немає даних для копіювання";
         }
