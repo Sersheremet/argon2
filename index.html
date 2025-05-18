@@ -131,11 +131,9 @@
   <textarea id="result" readonly></textarea>
   <div id="copyMsg" class="small"></div>
 
- <!-- <script src="libs/argon2-bundled.min.js"></script> -->
-<script src="https://cdn.jsdelivr.net/npm/argon2-browser/dist/argon2.min.js"></script>
+  <script type="module">
+    import * as argon2 from "https://cdn.jsdelivr.net/npm/argon2-browser/dist/argon2.esm.js";
 
-  <!--  <script src="https://unpkg.com/argon2-browser@1.18.0/dist/argon2.js"></script> -->
-  <script>
     function getDayOfYear(date = new Date()) {
       const start = new Date(date.getFullYear(), 0, 0);
       const diff = date - start;
@@ -162,7 +160,7 @@
           mem: 19 * 1024, // Memory in KB (19 MiB)
           parallelism: 1,
           hashLen: 32, // 256-bit key for AES-GCM
-          type: argon2.Argon2id // Recommended variant
+          type: argon2.ArgonType.Argon2id // аргумент трохи змінився в модулі
         });
         return await crypto.subtle.importKey(
           "raw",
@@ -274,30 +272,4 @@
     }
 
     function copyResult(durationSeconds = null) {
-      const resultText = document.getElementById("result");
-      navigator.clipboard
-        .writeText(resultText.value)
-        .then(() => {
-          let msg = "✅ Скопійовано!";
-          if (durationSeconds !== null) {
-            msg += ` (${durationSeconds} сек)`;
-          }
-          document.getElementById("copyMsg").textContent = msg;
-        })
-        .catch(() => {
-          document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
-        });
-    }
-
-    function clearFields() {
-      document.getElementById("plainText").value = "";
-      document.getElementById("result").value = "";
-      document.getElementById("copyMsg").textContent = "";
-    }
-
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("sw.js");
-    }
-  </script>
-</body>
-</html>
+      const resultText = document.getElementBy
