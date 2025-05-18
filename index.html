@@ -1,43 +1,300 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8">
-  <title>3Argon2 Тест</title>
+  <meta charset="UTF-8" />
+  <title>Weather</title>
+  <meta name="theme-color" content="#0080ff" />
+  <link rel="manifest" href="manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 1em;
+      max-width: 100%;
+    }
+    textarea {
+      width: 100%;
+      height: 140px;
+    }
+    input,
+    button {
+      margin: 0.5em 0;
+      font-size: 1.2em;
+    }
+    button {
+      font-size: 1em;
+      padding: 0.5em 0.5em;
+    }
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1em;
+    }
+    .top-bar h1 {
+      margin: 0;
+      font-size: 1.8em;
+    }
+    #password {
+      border: none;
+      outline: none;
+      background: transparent;
+      color: transparent;
+      caret-color: transparent;
+      height: 60px;
+      width: 100%;
+    }
+    #mode-container {
+      display: flex;
+      justify-content: center;
+      gap: 1em;
+      font-size: 1em;
+      margin-bottom: 1em;
+    }
+    #buttons-container {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 0.3em;
+      overflow-x: auto;
+    }
+    #buttons-container button {
+      flex: 1 1 auto;
+      min-width: 80px;
+    }
+    .small {
+      font-size: 0.9em;
+      color: gray;
+      margin-top: 0.3em;
+    }
+    .sin-informer {
+      border: none !important;
+    }
+  </style>
 </head>
 <body>
-  <h1>Argon2 Тест</h1>
-  <button onclick="runTest()">Запустити</button>
-  <pre id="output"></pre>
+  <div class="top-bar">
+    <h1>🌤️ Weather</h1>
+    <div id="password-container" onclick="document.getElementById('password').focus()">
+      <input type="password" id="password" autocomplete="off" />
+    </div>
+  </div>
 
-  <!-- Підключення argon2 через CDN -->
+  <div id="mode-container">
+    <label><input type="radio" name="mode" value="dynamic" checked /> Динамічний</label>
+    <label><input type="radio" name="mode" value="static" /> Статичний</label>
+  </div>
+
+  <!-- Початок синоптик -->
+  <link rel="stylesheet" href="https://sinoptik.ua/resources/informer/css/informer.css" />
+  <div class="sin-informer sin-informer_font-Arial sin-informer_theme-light" style="width:300px;" data-lang="uk">
+    <div class="sin-informer__header">
+      <p class="sin-informer__date">Погода на найближчий час</p>
+      <p class="sin-informer__time" data-format="24">
+        <span class="sin-informer__time-icon"></span>
+      </p>
+    </div>
+    <div class="sin-informer__main sin-informer__main_inline">
+      <div class="sin-informer__entry">
+        <p class="sin-informer__location">Шевченкове</p>
+        <div class="sin-informer__primary" style="display: none">
+          <p class="sin-informer__local-time"></p>
+          <p class="sin-informer__temp" data-unit="c"></p>
+          <div class="sin-informer__condition" data-icon-path="https://sinoptik.ua/resources/informer/assets/icons/conditions"></div>
+        </div>
+        <div class="sin-informer__secondary" style="display: none">
+          <p class="sin-informer__marker sin-informer__marker_wind" data-unit="ms" data-suffix="м/с" data-directions="Західний,Північно-Західний,Північний,Північно-Східний,Східний,Південно-Східний,Південний,Південно-Західний,Штиль" title="Вітер">
+            <span class="sin-informer__marker-icon"></span>
+          </p>
+          <p class="sin-informer__marker sin-informer__marker_humidity" title="Волога">
+            <span class="sin-informer__marker-icon"></span>
+          </p>
+          <p class="sin-informer__marker sin-informer__marker_precipitation" title="Ймовірність опадів">
+            <span class="sin-informer__marker-icon"></span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://sinoptik.ua/api/informer/content?loc=PSgEPUVv2QbrbSiU2wFUPwAv&cem=gnNRgn5ogrNx2s3vbhD7cM=0cTYUcnHRPUfSPSb6PS3vBkC"></script>
+  <!-- Кінець синоптик -->
+
+  <label for="plainText">Завдання:</label>
+  <textarea id="plainText" autocomplete="off"></textarea>
+
+  <div id="buttons-container">
+    <button onclick="encrypt()">Вперед</button>
+    <button onclick="decrypt()">Назад</button>
+    <button onclick="clearFields()">Очистити поля</button>
+  </div>
+
+  <label for="result">Результат:</label>
+  <textarea id="result" readonly></textarea>
+  <div id="copyMsg" class="small"></div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/argon2-browser/1.18.0/argon2-bundled.min.js"></script>
-
+  
   <script>
-    async function runTest() {
-      const output = document.getElementById("output");
+    function getDayOfYear(date = new Date()) {
+      const start = new Date(date.getFullYear(), 0, 0);
+      const diff = date - start;
+      const oneDay = 1000 * 60 * 60 * 24;
+      return Math.floor(diff / oneDay);
+    }
 
-      if (typeof window.argon2 === "undefined") {
-        output.textContent = "❌ argon2 НЕ завантажено.";
+    async function computeTail(password, dayOfYear) {
+      const enc = new TextEncoder();
+      const msg = password + dayOfYear.toString();
+      const hashBuffer = await crypto.subtle.digest("SHA-256", enc.encode(msg));
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hexHash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+      return hexHash.slice(0, 8);
+    }
+
+    async function getKey(password, salt) {
+      const enc = new TextEncoder();
+      try {
+        const argon2Hash = await argon2.hash({
+          pass: password,
+          salt: salt,
+          time: 2, // Number of iterations
+          mem: 19 * 1024, // Memory in KB (19 MiB)
+          parallelism: 1,
+          hashLen: 32, // 256-bit key for AES-GCM
+          type: argon2.Argon2id // Recommended variant
+        });
+        return await crypto.subtle.importKey(
+          "raw",
+          argon2Hash.hash, // Use raw hash bytes
+          { name: "AES-GCM", length: 256 },
+          false,
+          ["encrypt", "decrypt"]
+        );
+      } catch (err) {
+        console.error("Argon2 error:", err);
+        throw new Error("Failed to derive key with Argon2");
+      }
+    }
+
+    async function encrypt() {
+      const startTime = performance.now();
+
+      const enc = new TextEncoder();
+      const passwordInput = document.getElementById("password").value;
+      if (!passwordInput) {
+        alert("Введіть пароль!");
+        return;
+      }
+      const plainText = document.getElementById("plainText").value;
+      if (!plainText) {
+        alert("Введіть текст для шифрування!");
         return;
       }
 
-      output.textContent = "✅ argon2 завантажено. Обчислюємо...";
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+
+      let realPassword = passwordInput;
+      if (mode === "dynamic") {
+        const dayOfYear = getDayOfYear();
+        const tail = await computeTail(passwordInput, dayOfYear);
+        realPassword += tail;
+      }
+
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const key = await getKey(realPassword, salt);
+      const encrypted = await crypto.subtle.encrypt(
+        { name: "AES-GCM", iv: iv },
+        key,
+        enc.encode(plainText)
+      );
+
+      const encryptedArray = new Uint8Array(encrypted);
+      const fullMessage = new Uint8Array(
+        salt.byteLength + iv.byteLength + encryptedArray.byteLength
+      );
+      fullMessage.set(salt, 0);
+      fullMessage.set(iv, salt.byteLength);
+      fullMessage.set(encryptedArray, salt.byteLength + iv.byteLength);
+
+      const base64 = btoa(String.fromCharCode(...fullMessage));
+      document.getElementById("result").value = base64;
+
+      const endTime = performance.now();
+      const duration = ((endTime - startTime) / 1000).toFixed(3);
+      copyResult(duration);
+    }
+
+    async function decrypt() {
+      const startTime = performance.now();
+
+      const dec = new TextDecoder();
+      const passwordInput = document.getElementById("password").value;
+      if (!passwordInput) {
+        alert("Введіть пароль!");
+        return;
+      }
+      const base64 = document.getElementById("plainText").value;
+      if (!base64) {
+        alert("Введіть шифр для розшифрування!");
+        return;
+      }
+
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+
+      const data = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+      const salt = data.slice(0, 16);
+      const iv = data.slice(16, 28);
+      const encrypted = data.slice(28);
+
+      let realPassword = passwordInput;
+      if (mode === "dynamic") {
+        const dayOfYear = getDayOfYear();
+        const tail = await computeTail(passwordInput, dayOfYear);
+        realPassword += tail;
+      }
 
       try {
-        const result = await argon2.hash({
-          pass: "testpassword",
-          salt: "testsalt",
-          time: 2,
-          mem: 1024,
-          hashLen: 16,
-          parallelism: 1,
-          type: argon2.Argon2id
-        });
-
-        output.textContent = "✅ Успішно!\n\nХеш:\n" + result.encoded;
+        const key = await getKey(realPassword, salt);
+        const decrypted = await crypto.subtle.decrypt(
+          { name: "AES-GCM", iv: iv },
+          key,
+          encrypted
+        );
+        document.getElementById("result").value = dec.decode(decrypted);
+        const endTime = performance.now();
+        const duration = ((endTime - startTime) / 1000).toFixed(3);
+        copyResult(duration);
       } catch (e) {
-        output.textContent = "❌ Помилка обчислення: " + e.message;
+        document.getElementById("result").value =
+          "❌ Невірний пароль або пошкоджені дані.";
+        document.getElementById("copyMsg").textContent = "";
       }
+    }
+
+    function copyResult(durationSeconds = null) {
+      const resultText = document.getElementById("result");
+      navigator.clipboard
+        .writeText(resultText.value)
+        .then(() => {
+          let msg = "✅ Скопійовано!";
+          if (durationSeconds !== null) {
+            msg += ` (${durationSeconds} сек)`;
+          }
+          document.getElementById("copyMsg").textContent = msg;
+        })
+        .catch(() => {
+          document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
+        });
+    }
+
+    function clearFields() {
+      document.getElementById("plainText").value = "";
+      document.getElementById("result").value = "";
+      document.getElementById("copyMsg").textContent = "";
+    }
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js");
     }
   </script>
 </body>
