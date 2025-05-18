@@ -221,24 +221,36 @@
       const duration = ((endTime - startTime) / 1000).toFixed(3);
       const result = document.getElementById("result");
       if (result.value) {
-        // Спочатку спробуємо document.execCommand для Safari PWA
         try {
-          result.focus();
-          result.select();
-          const success = document.execCommand("copy");
-          if (success) {
+          await navigator.clipboard.writeText(result.value);
+          // Перевірка вмісту буфера (якщо підтримується)
+          try {
+            const clipboardContent = await navigator.clipboard.readText();
+            if (clipboardContent === result.value) {
+              document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
+            } else {
+              throw new Error("Clipboard content mismatch");
+            }
+          } catch (e) {
+            // Якщо readText не підтримується, покладаємося на writeText
             document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
-          } else {
-            throw new Error("execCommand failed");
           }
         } catch (e) {
-          console.error("Помилка execCommand:", e);
-          // Резервний метод: navigator.clipboard
+          console.error("Помилка navigator.clipboard:", e);
           try {
-            await navigator.clipboard.writeText(result.value);
-            document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
+            // Тимчасово знімаємо readonly для копіювання
+            result.removeAttribute("readonly");
+            result.focus();
+            result.select();
+            const success = document.execCommand("copy");
+            result.setAttribute("readonly", "");
+            if (success) {
+              document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
+            } else {
+              throw new Error("execCommand failed");
+            }
           } catch (e2) {
-            console.error("Помилка navigator.clipboard:", e2);
+            console.error("Помилка execCommand:", e2);
             document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
           }
         }
@@ -287,24 +299,36 @@
         const duration = ((endTime - startTime) / 1000).toFixed(3);
         const result = document.getElementById("result");
         if (result.value) {
-          // Спочатку спробуємо document.execCommand для Safari PWA
           try {
-            result.focus();
-            result.select();
-            const success = document.execCommand("copy");
-            if (success) {
+            await navigator.clipboard.writeText(result.value);
+            // Перевірка вмісту буфера (якщо підтримується)
+            try {
+              const clipboardContent = await navigator.clipboard.readText();
+              if (clipboardContent === result.value) {
+                document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
+              } else {
+                throw new Error("Clipboard content mismatch");
+              }
+            } catch (e) {
+              // Якщо readText не підтримується, покладаємося на writeText
               document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
-            } else {
-              throw new Error("execCommand failed");
             }
           } catch (e) {
-            console.error("Помилка execCommand:", e);
-            // Резервний метод: navigator.clipboard
+            console.error("Помилка navigator.clipboard:", e);
             try {
-              await navigator.clipboard.writeText(result.value);
-              document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
+              // Тимчасово знімаємо readonly для копіювання
+              result.removeAttribute("readonly");
+              result.focus();
+              result.select();
+              const success = document.execCommand("copy");
+              result.setAttribute("readonly", "");
+              if (success) {
+                document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
+              } else {
+                throw new Error("execCommand failed");
+              }
             } catch (e2) {
-              console.error("Помилка navigator.clipboard:", e2);
+              console.error("Помилка execCommand:", e2);
               document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
             }
           }
