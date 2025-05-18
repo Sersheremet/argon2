@@ -166,8 +166,8 @@
         const argon2Hash = await argon2.hash({
           pass: password,
           salt: salt,
-          time: 7,
-          mem: 40 * 1024,
+          time: 7, //кількість ітерацій
+          mem: 40 * 1024, // пам'ять
           parallelism: 1,
           hashLen: 32,
           type: argon2.Argon2id
