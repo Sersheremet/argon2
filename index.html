@@ -79,7 +79,7 @@
 </head>
 <body>
   <div class="top-bar">
-    <h1>🌤️ Weather15</h1>
+    <h1>🌤️ Weather18</h1>
     <div id="password-container" onclick="document.getElementById('password').focus()">
       <input type="password" id="password" autocomplete="off" />
     </div>
@@ -90,7 +90,7 @@
     <label><input type="radio" name="mode" value="static" /> Статичний</label>
   </div>
 
-  <!-- Початок синоптик -->
+  <!-- Sinoptik -->
   <link rel="stylesheet" href="https://sinoptik.ua/resources/informer/css/informer.css" />
   <div class="sin-informer sin-informer_font-Arial sin-informer_theme-light" style="width:300px;" data-lang="uk">
     <div class="sin-informer__header">
@@ -122,7 +122,6 @@
     </div>
   </div>
   <script defer src="https://sinoptik.ua/api/informer/content?loc=PSgEPUVv2QbrbSiU2wFUPwAv&cem=gnNRgn5ogrNx2s3vbhD7cM=0cTYUcnHRPUfSPSb6PS3vBkC"></script>
-  <!-- Кінець синоптик -->
 
   <label for="plainText">Завдання:</label>
   <textarea id="plainText" autocomplete="off"></textarea>
@@ -150,10 +149,15 @@
     async function computeTail(password, dayOfYear) {
       const enc = new TextEncoder();
       const msg = password + dayOfYear.toString();
-      const hashBuffer = await crypto.subtle.digest("SHA-256", enc.encode(msg));
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hexHash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-      return hexHash.slice(0, 32);
+      try {
+        const hashBuffer = await crypto.subtle.digest("SHA-256", enc.encode(msg));
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hexHash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+        return hexHash.slice(0, 32);
+      } catch (e) {
+        console.error("computeTail error:", e.message, e.stack);
+        throw e;
+      }
     }
 
     async function getKey(password, salt) {
@@ -162,8 +166,8 @@
         const argon2Hash = await argon2.hash({
           pass: password,
           salt: salt,
-          time: 7, // Повернуто до 7
-          mem: 40 * 1024, // Повернуто до 40 МБ
+          time: 7,
+          mem: 40 * 1024,
           parallelism: 1,
           hashLen: 32,
           type: argon2.Argon2id
@@ -182,7 +186,6 @@
     }
 
     function copyToClipboard(text, duration) {
-      // Очищаємо попередній вміст copyMsg
       const copyMsg = document.getElementById("copyMsg");
       copyMsg.innerHTML = "";
       
@@ -214,46 +217,51 @@
         return;
       }
 
-      const mode = document.querySelector('input[name="mode"]:checked').value;
-      let realPassword = passwordInput;
-      if (mode === "dynamic") {
-        const dayOfYear = getDayOfYear();
-        const tail = await computeTail(passwordInput, dayOfYear);
-        realPassword += tail;
-      }
-
-      const salt = crypto.getRandomValues(new Uint8Array(16));
-      const iv = crypto.getRandomValues(new Uint8Array(12));
-      const key = await getKey(realPassword, salt);
-      const encrypted = await crypto.subtle.encrypt(
-        { name: "AES-GCM", iv: iv },
-        key,
-        enc.encode(plainText)
-      );
-
-      const encryptedArray = new Uint8Array(encrypted);
-      const fullMessage = new Uint8Array(
-        salt.byteLength + iv.byteLength + encryptedArray.byteLength
-      );
-      fullMessage.set(salt, 0);
-      fullMessage.set(iv marzo de 2023salt.byteLength);
-      fullMessage.set(encryptedArray, salt.byteLength + iv.byteLength);
-
-      const base64 = btoa(String.fromCharCode(...fullMessage));
-      document.getElementById("result").value = base64;
-
-      const endTime = performance.now();
-      const duration = ((endTime - startTime) / 1000).toFixed(3);
-      const resultText = document.getElementById("result").value;
-      if (resultText) {
-        // Знімаємо фокус
-        if (document.activeElement) {
-          document.activeElement.blur();
-          console.log("Фокус знято з:", document.activeElement);
+      try {
+        const mode = document.querySelector('input[name="mode"]:checked').value;
+        let realPassword = passwordInput;
+        if (mode === "dynamic") {
+          const dayOfYear = getDayOfYear();
+          const tail = await computeTail(passwordInput, dayOfYear);
+          realPassword += tail;
         }
-        copyToClipboard(resultText, duration);
-      } else {
-        document.getElementById("copyMsg").textContent = "Немає даних для копіювання";
+
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const key = await getKey(realPassword, salt);
+        const encrypted = await crypto.subtle.encrypt(
+          { name: "AES-GCM", iv: iv },
+          key,
+          enc.encode(plainText)
+        );
+
+        const encryptedArray = new Uint8Array(encrypted);
+        const fullMessage = new Uint8Array(
+          salt.byteLength + iv.byteLength + encryptedArray.byteLength
+        );
+        fullMessage.set(salt, 0);
+        fullMessage.set(iv, salt.byteLength);
+        fullMessage.set(encryptedArray, salt.byteLength + iv.byteLength);
+
+        const base64 = btoa(String.fromCharCode(...fullMessage));
+        document.getElementById("result").value = base64;
+
+        const endTime = performance.now();
+        const duration = ((endTime - startTime) / 1000).toFixed(3);
+        const resultText = document.getElementById("result").value;
+        if (resultText) {
+          if (document.activeElement) {
+            document.activeElement.blur();
+            console.log("Фокус знято з:", document.activeElement);
+          }
+          copyToClipboard(resultText, duration);
+        } else {
+          document.getElementById("copyMsg").textContent = "Немає даних для копіювання";
+        }
+      } catch (e) {
+        console.error("Encryption error:", e.message, e.stack);
+        document.getElementById("result").value = "❌ Помилка шифрування.";
+        document.getElementById("copyMsg").textContent = "";
       }
     }
 
@@ -271,20 +279,20 @@
         return;
       }
 
-      const mode = document.querySelector('input[name="mode"]:checked').value;
-      const data = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
-      const salt = data.slice(0, 16);
-      const iv = data.slice(16, 28);
-      const encrypted = data.slice(28);
-
-      let realPassword = passwordInput;
-      if (mode === "dynamic") {
-        const dayOfYear = getDayOfYear();
-        const tail = await computeTail(passwordInput, dayOfYear);
-        realPassword += tail;
-      }
-
       try {
+        const mode = document.querySelector('input[name="mode"]:checked').value;
+        const data = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+        const salt = data.slice(0, 16);
+        const iv = data.slice(16, 28);
+        const encrypted = data.slice(28);
+
+        let realPassword = passwordInput;
+        if (mode === "dynamic") {
+          const dayOfYear = getDayOfYear();
+          const tail = await computeTail(passwordInput, dayOfYear);
+          realPassword += tail;
+        }
+
         const key = await getKey(realPassword, salt);
         const decrypted = await crypto.subtle.decrypt(
           { name: "AES-GCM", iv: iv },
@@ -296,7 +304,6 @@
         const endTime = performance.now();
         const duration = ((endTime - startTime) / 1000).toFixed(3);
         if (resultText) {
-          // Знімаємо фокус
           if (document.activeElement) {
             document.activeElement.blur();
             console.log("Фокус знято з:", document.activeElement);
@@ -306,6 +313,7 @@
           document.getElementById("copyMsg").textContent = "Немає даних для копіювання";
         }
       } catch (e) {
+        console.error("Decryption error:", e.message, e.stack);
         document.getElementById("result").value = "❌ Невірний пароль або пошкоджені дані.";
         document.getElementById("copyMsg").textContent = "";
       }
