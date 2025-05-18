@@ -73,7 +73,7 @@
 </head>
 <body>
   <div class="top-bar">
-    <h1>🌤️ Weather3</h1>
+    <h1>🌤️ Weather4</h1>
     <div id="password-container" onclick="document.getElementById('password').focus()">
       <input type="password" id="password" autocomplete="off" />
     </div>
@@ -157,7 +157,7 @@
           pass: password,
           salt: salt,
           time: 10, // кількість ітерацій
-          mem: 24 * 1024, // Пам'ять в KB
+          mem: 40 * 1024, // Пам'ять в KB
           parallelism: 1,
           hashLen: 32, // 256-bit key for AES-GCM
           type: argon2.Argon2id
