@@ -79,7 +79,7 @@
 </head>
 <body>
   <div class="top-bar">
-    <h1>🌤️ Weather18</h1>
+    <h1>🌤️ Weather20</h1>
     <div id="password-container" onclick="document.getElementById('password').focus()">
       <input type="password" id="password" autocomplete="off" />
     </div>
@@ -149,57 +149,49 @@
     async function computeTail(password, dayOfYear) {
       const enc = new TextEncoder();
       const msg = password + dayOfYear.toString();
-      try {
-        const hashBuffer = await crypto.subtle.digest("SHA-256", enc.encode(msg));
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hexHash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-        return hexHash.slice(0, 32);
-      } catch (e) {
-        console.error("computeTail error:", e.message, e.stack);
-        throw e;
-      }
+      const hashBuffer = await crypto.subtle.digest("SHA-256", enc.encode(msg));
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hexHash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+      return hexHash.slice(0, 32);
     }
 
     async function getKey(password, salt) {
-      const enc = new TextEncoder();
-      try {
-        const argon2Hash = await argon2.hash({
-          pass: password,
-          salt: salt,
-          time: 7, //кількість ітерацій
-          mem: 40 * 1024, // пам'ять
-          parallelism: 1,
-          hashLen: 32,
-          type: argon2.Argon2id
-        });
-        return await crypto.subtle.importKey(
-          "raw",
-          argon2Hash.hash,
-          { name: "AES-GCM", length: 256 },
-          false,
-          ["encrypt", "decrypt"]
-        );
-      } catch (err) {
-        console.error("Argon2 error:", err.message, err.stack);
-        throw new Error("Failed to derive key with Argon2");
-      }
+      const argon2Hash = await argon2.hash({
+        pass: password,
+        salt: salt,
+        time: 7, // ітерації
+        mem: 40 * 1024, //пам'ять
+        parallelism: 1,
+        hashLen: 32,
+        type: argon2.Argon2id
+      });
+      return await crypto.subtle.importKey(
+        "raw",
+        argon2Hash.hash,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt", "decrypt"]
+      );
+    }
+
+    function isIOS() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     }
 
     function copyToClipboard(text, duration) {
       const copyMsg = document.getElementById("copyMsg");
       copyMsg.innerHTML = "";
-      
-      if (navigator.clipboard && navigator.clipboard.writeText) {
+
+      const safeText = text.replace(/'/g, "\\'");
+
+      if (navigator.clipboard && navigator.clipboard.writeText && !isIOS()) {
         navigator.clipboard.writeText(text).then(() => {
           copyMsg.textContent = `✅ Скопійовано! (${duration} сек)`;
-          console.log("navigator.clipboard: Успішно скопійовано");
-        }).catch((e) => {
-          console.error("Помилка navigator.clipboard:", e.message, e.stack);
-          copyMsg.innerHTML = `❌ Не вдалося скопіювати. <button onclick="copyToClipboard('${text.replace(/'/g, "\\'")}', ${duration})">Скопіювати</button>`;
+        }).catch(() => {
+          copyMsg.innerHTML = `⏱️ ${duration} сек <button onclick="copyToClipboard('${safeText}', ${duration})">Скопіювати</button>`;
         });
       } else {
-        console.log("navigator.clipboard недоступний");
-        copyMsg.innerHTML = `❌ Копіювання не підтримується. <button onclick="copyToClipboard('${text.replace(/'/g, "\\'")}', ${duration})">Скопіювати</button>`;
+        copyMsg.innerHTML = `⏱️ ${duration} сек <button onclick="copyToClipboard('${safeText}', ${duration})">Скопіювати</button>`;
       }
     }
 
@@ -207,113 +199,67 @@
       const startTime = performance.now();
       const enc = new TextEncoder();
       const passwordInput = document.getElementById("password").value;
-      if (!passwordInput) {
-        alert("Введіть пароль!");
-        return;
-      }
+      if (!passwordInput) return alert("Введіть пароль!");
       const plainText = document.getElementById("plainText").value;
-      if (!plainText) {
-        alert("Введіть текст для шифрування!");
-        return;
+      if (!plainText) return alert("Введіть текст для шифрування!");
+
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+      let realPassword = passwordInput;
+      if (mode === "dynamic") {
+        const dayOfYear = getDayOfYear();
+        const tail = await computeTail(passwordInput, dayOfYear);
+        realPassword += tail;
       }
 
-      try {
-        const mode = document.querySelector('input[name="mode"]:checked').value;
-        let realPassword = passwordInput;
-        if (mode === "dynamic") {
-          const dayOfYear = getDayOfYear();
-          const tail = await computeTail(passwordInput, dayOfYear);
-          realPassword += tail;
-        }
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const key = await getKey(realPassword, salt);
+      const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(plainText));
 
-        const salt = crypto.getRandomValues(new Uint8Array(16));
-        const iv = crypto.getRandomValues(new Uint8Array(12));
-        const key = await getKey(realPassword, salt);
-        const encrypted = await crypto.subtle.encrypt(
-          { name: "AES-GCM", iv: iv },
-          key,
-          enc.encode(plainText)
-        );
+      const encryptedArray = new Uint8Array(encrypted);
+      const fullMessage = new Uint8Array(salt.byteLength + iv.byteLength + encryptedArray.byteLength);
+      fullMessage.set(salt, 0);
+      fullMessage.set(iv, salt.byteLength);
+      fullMessage.set(encryptedArray, salt.byteLength + iv.byteLength);
 
-        const encryptedArray = new Uint8Array(encrypted);
-        const fullMessage = new Uint8Array(
-          salt.byteLength + iv.byteLength + encryptedArray.byteLength
-        );
-        fullMessage.set(salt, 0);
-        fullMessage.set(iv, salt.byteLength);
-        fullMessage.set(encryptedArray, salt.byteLength + iv.byteLength);
+      const base64 = btoa(String.fromCharCode(...fullMessage));
+      document.getElementById("result").value = base64;
 
-        const base64 = btoa(String.fromCharCode(...fullMessage));
-        document.getElementById("result").value = base64;
-
-        const endTime = performance.now();
-        const duration = ((endTime - startTime) / 1000).toFixed(3);
-        const resultText = document.getElementById("result").value;
-        if (resultText) {
-          if (document.activeElement) {
-            document.activeElement.blur();
-            console.log("Фокус знято з:", document.activeElement);
-          }
-          copyToClipboard(resultText, duration);
-        } else {
-          document.getElementById("copyMsg").textContent = "Немає даних для копіювання";
-        }
-      } catch (e) {
-        console.error("Encryption error:", e.message, e.stack);
-        document.getElementById("result").value = "❌ Помилка шифрування.";
-        document.getElementById("copyMsg").textContent = "";
-      }
+      const duration = ((performance.now() - startTime) / 1000).toFixed(3);
+      if (base64) copyToClipboard(base64, duration);
     }
 
     async function decrypt() {
       const startTime = performance.now();
       const dec = new TextDecoder();
       const passwordInput = document.getElementById("password").value;
-      if (!passwordInput) {
-        alert("Введіть пароль!");
-        return;
-      }
+      if (!passwordInput) return alert("Введіть пароль!");
       const base64 = document.getElementById("plainText").value;
-      if (!base64) {
-        alert("Введіть шифр для розшифрування!");
-        return;
+      if (!base64) return alert("Введіть шифр для розшифрування!");
+
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+      const data = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+      const salt = data.slice(0, 16);
+      const iv = data.slice(16, 28);
+      const encrypted = data.slice(28);
+
+      let realPassword = passwordInput;
+      if (mode === "dynamic") {
+        const dayOfYear = getDayOfYear();
+        const tail = await computeTail(passwordInput, dayOfYear);
+        realPassword += tail;
       }
 
       try {
-        const mode = document.querySelector('input[name="mode"]:checked').value;
-        const data = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
-        const salt = data.slice(0, 16);
-        const iv = data.slice(16, 28);
-        const encrypted = data.slice(28);
-
-        let realPassword = passwordInput;
-        if (mode === "dynamic") {
-          const dayOfYear = getDayOfYear();
-          const tail = await computeTail(passwordInput, dayOfYear);
-          realPassword += tail;
-        }
-
         const key = await getKey(realPassword, salt);
-        const decrypted = await crypto.subtle.decrypt(
-          { name: "AES-GCM", iv: iv },
-          key,
-          encrypted
-        );
+        const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, encrypted);
         const resultText = dec.decode(decrypted);
         document.getElementById("result").value = resultText;
-        const endTime = performance.now();
-        const duration = ((endTime - startTime) / 1000).toFixed(3);
-        if (resultText) {
-          if (document.activeElement) {
-            document.activeElement.blur();
-            console.log("Фокус знято з:", document.activeElement);
-          }
-          copyToClipboard(resultText, duration);
-        } else {
-          document.getElementById("copyMsg").textContent = "Немає даних для копіювання";
-        }
+
+        const duration = ((performance.now() - startTime) / 1000).toFixed(3);
+        if (resultText) copyToClipboard(resultText, duration);
       } catch (e) {
-        console.error("Decryption error:", e.message, e.stack);
+        console.error("Decryption error:", e.message);
         document.getElementById("result").value = "❌ Невірний пароль або пошкоджені дані.";
         document.getElementById("copyMsg").textContent = "";
       }
