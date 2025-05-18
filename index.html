@@ -79,7 +79,7 @@
 </head>
 <body>
   <div class="top-bar">
-    <h1>🌤️ Weather14</h1>
+    <h1>🌤️ Weather15</h1>
     <div id="password-container" onclick="document.getElementById('password').focus()">
       <input type="password" id="password" autocomplete="off" />
     </div>
@@ -90,7 +90,7 @@
     <label><input type="radio" name="mode" value="static" /> Статичний</label>
   </div>
 
-  <!-- Sinoptik закоментований
+  <!-- Початок синоптик -->
   <link rel="stylesheet" href="https://sinoptik.ua/resources/informer/css/informer.css" />
   <div class="sin-informer sin-informer_font-Arial sin-informer_theme-light" style="width:300px;" data-lang="uk">
     <div class="sin-informer__header">
@@ -122,7 +122,7 @@
     </div>
   </div>
   <script defer src="https://sinoptik.ua/api/informer/content?loc=PSgEPUVv2QbrbSiU2wFUPwAv&cem=gnNRgn5ogrNx2s3vbhD7cM=0cTYUcnHRPUfSPSb6PS3vBkC"></script>
-  -->
+  <!-- Кінець синоптик -->
 
   <label for="plainText">Завдання:</label>
   <textarea id="plainText" autocomplete="off"></textarea>
@@ -162,8 +162,8 @@
         const argon2Hash = await argon2.hash({
           pass: password,
           salt: salt,
-          time: 3,
-          mem: 20 * 1024,
+          time: 7, // Повернуто до 7
+          mem: 40 * 1024, // Повернуто до 40 МБ
           parallelism: 1,
           hashLen: 32,
           type: argon2.Argon2id
@@ -236,7 +236,7 @@
         salt.byteLength + iv.byteLength + encryptedArray.byteLength
       );
       fullMessage.set(salt, 0);
-      fullMessage.set(iv, salt.byteLength);
+      fullMessage.set(iv marzo de 2023salt.byteLength);
       fullMessage.set(encryptedArray, salt.byteLength + iv.byteLength);
 
       const base64 = btoa(String.fromCharCode(...fullMessage));
@@ -246,14 +246,12 @@
       const duration = ((endTime - startTime) / 1000).toFixed(3);
       const resultText = document.getElementById("result").value;
       if (resultText) {
-        setTimeout(() => {
-          // Знімаємо фокус
-          if (document.activeElement) {
-            document.activeElement.blur();
-            console.log("Фокус знято з:", document.activeElement);
-          }
-          copyToClipboard(resultText, duration);
-        }, 500);
+        // Знімаємо фокус
+        if (document.activeElement) {
+          document.activeElement.blur();
+          console.log("Фокус знято з:", document.activeElement);
+        }
+        copyToClipboard(resultText, duration);
       } else {
         document.getElementById("copyMsg").textContent = "Немає даних для копіювання";
       }
@@ -298,14 +296,12 @@
         const endTime = performance.now();
         const duration = ((endTime - startTime) / 1000).toFixed(3);
         if (resultText) {
-          setTimeout(() => {
-            // Знімаємо фокус
-            if (document.activeElement) {
-              document.activeElement.blur();
-              console.log("Фокус знято з:", document.activeElement);
-            }
-            copyToClipboard(resultText, duration);
-          }, 500);
+          // Знімаємо фокус
+          if (document.activeElement) {
+            document.activeElement.blur();
+            console.log("Фокус знято з:", document.activeElement);
+          }
+          copyToClipboard(resultText, duration);
         } else {
           document.getElementById("copyMsg").textContent = "Немає даних для копіювання";
         }
