@@ -73,7 +73,7 @@
 </head>
 <body>
   <div class="top-bar">
-    <h1>🌤️ Weather2</h1>
+    <h1>🌤️ Weather3</h1>
     <div id="password-container" onclick="document.getElementById('password').focus()">
       <input type="password" id="password" autocomplete="off" />
     </div>
@@ -156,7 +156,7 @@
         const argon2Hash = await argon2.hash({
           pass: password,
           salt: salt,
-          time: 3, // кількість ітерацій
+          time: 10, // кількість ітерацій
           mem: 24 * 1024, // Пам'ять в KB
           parallelism: 1,
           hashLen: 32, // 256-bit key for AES-GCM
