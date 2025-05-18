@@ -73,7 +73,7 @@
 </head>
 <body>
   <div class="top-bar">
-    <h1>🌤️ Weather7</h1>
+    <h1>🌤️ Weather6</h1>
     <div id="password-container" onclick="document.getElementById('password').focus()">
       <input type="password" id="password" autocomplete="off" />
     </div>
@@ -223,11 +223,16 @@
       if (result.value) {
         setTimeout(() => {
           try {
-            result.removeAttribute("readonly");
-            result.focus();
-            result.select();
+            // Створюємо прихований input для копіювання
+            const tempInput = document.createElement("input");
+            tempInput.style.position = "absolute";
+            tempInput.style.left = "-9999px";
+            tempInput.value = result.value;
+            document.body.appendChild(tempInput);
+            tempInput.focus();
+            tempInput.select();
             const success = document.execCommand("copy");
-            result.setAttribute("readonly", "");
+            document.body.removeChild(tempInput);
             if (success) {
               document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
             } else {
@@ -295,11 +300,16 @@
         if (result.value) {
           setTimeout(() => {
             try {
-              result.removeAttribute("readonly");
-              result.focus();
-              result.select();
+              // Створюємо прихований input для копіювання
+              const tempInput = document.createElement("input");
+              tempInput.style.position = "absolute";
+              tempInput.style.left = "-9999px";
+              tempInput.value = result.value;
+              document.body.appendChild(tempInput);
+              tempInput.focus();
+              tempInput.select();
               const success = document.execCommand("copy");
-              result.setAttribute("readonly", "");
+              document.body.removeChild(tempInput);
               if (success) {
                 document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
               } else {
