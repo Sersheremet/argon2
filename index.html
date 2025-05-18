@@ -2,31 +2,31 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <title>2Argon2 Тест</title>
+  <title>3Argon2 Тест</title>
 </head>
 <body>
   <h1>Argon2 Тест</h1>
-  <button onclick="runArgon2()">Запустити</button>
+  <button onclick="runTest()">Запустити</button>
   <pre id="output"></pre>
 
-  <!-- Робочий UMD варіант, який додає window.argon2 -->
-  <script src="https://cdn.jsdelivr.net/npm/argon2-browser@1.15.2/dist/argon2.min.js"></script>
+  <!-- Підключення argon2 через CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/argon2-browser/1.18.0/argon2-bundled.min.js"></script>
 
   <script>
-    async function runArgon2() {
-      const output = document.getElementById('output');
+    async function runTest() {
+      const output = document.getElementById("output");
 
-      if (!window.argon2) {
-        output.textContent = '❌ argon2 НЕ завантажено.';
+      if (typeof window.argon2 === "undefined") {
+        output.textContent = "❌ argon2 НЕ завантажено.";
         return;
       }
 
-      output.textContent = '✅ argon2 завантажено. Хешуємо...';
+      output.textContent = "✅ argon2 завантажено. Обчислюємо...";
 
       try {
         const result = await argon2.hash({
-          pass: "myPassword",
-          salt: "mySalt",
+          pass: "testpassword",
+          salt: "testsalt",
           time: 2,
           mem: 1024,
           hashLen: 16,
@@ -34,9 +34,9 @@
           type: argon2.Argon2id
         });
 
-        output.textContent += '\n\n🔐 Hash (Base64): ' + result.encoded;
-      } catch (err) {
-        output.textContent += '\n\n❌ Помилка: ' + err.message;
+        output.textContent = "✅ Успішно!\n\nХеш:\n" + result.encoded;
+      } catch (e) {
+        output.textContent = "❌ Помилка обчислення: " + e.message;
       }
     }
   </script>
