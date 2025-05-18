@@ -115,7 +115,7 @@
       </div>
     </div>
   </div>
-  <script src="https://sinoptik.ua/api/informer/content?loc=PSgEPUVv2QbrbSiU2wFUPwAv&cem=gnNRgn5ogrNx2s3vbhD7cM=0cTYUcnHRPUfSPSb6PS3vBkC"></script>
+  <script defer src="https://sinoptik.ua/api/informer/content?loc=PSgEPUVv2QbrbSiU2wFUPwAv&cem=gnNRgn5ogrNx2s3vbhD7cM=0cTYUcnHRPUfSPSb6PS3vBkC"></script>
   <!-- Кінець синоптик -->
 
   <label for="plainText">Завдання:</label>
@@ -123,7 +123,7 @@
 
   <div id="buttons-container">
     <button onclick="encrypt()">Вперед</button>
-    <button onclick="decrypt()">Назад</button>
+    <button onclick=" decrypt()">Назад</button>
     <button onclick="clearFields()">Очистити поля</button>
   </div>
 
@@ -177,7 +177,6 @@
 
     async function encrypt() {
       const startTime = performance.now();
-
       const enc = new TextEncoder();
       const passwordInput = document.getElementById("password").value;
       if (!passwordInput) {
@@ -191,7 +190,6 @@
       }
 
       const mode = document.querySelector('input[name="mode"]:checked').value;
-
       let realPassword = passwordInput;
       if (mode === "dynamic") {
         const dayOfYear = getDayOfYear();
@@ -221,12 +219,29 @@
 
       const endTime = performance.now();
       const duration = ((endTime - startTime) / 1000).toFixed(3);
-      copyResult(duration);
+      const result = document.getElementById("result");
+      if (result.value) {
+        try {
+          await navigator.clipboard.writeText(result.value);
+          document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
+        } catch (e) {
+          console.error("Помилка navigator.clipboard:", e);
+          try {
+            result.select();
+            document.execCommand("copy");
+            document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
+          } catch (e2) {
+            document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
+            console.error("Помилка execCommand:", e2);
+          }
+        }
+      } else {
+        document.getElementById("copyMsg").textContent = "Немає даних для копіювання";
+      }
     }
 
     async function decrypt() {
       const startTime = performance.now();
-
       const dec = new TextDecoder();
       const passwordInput = document.getElementById("password").value;
       if (!passwordInput) {
@@ -240,7 +255,6 @@
       }
 
       const mode = document.querySelector('input[name="mode"]:checked').value;
-
       const data = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
       const salt = data.slice(0, 16);
       const iv = data.slice(16, 28);
@@ -260,31 +274,33 @@
           key,
           encrypted
         );
-        document.getElementById("result").value = dec.decode(decrypted);
+        const resultText = dec.decode(decrypted);
+        document.getElementById("result").value = resultText;
         const endTime = performance.now();
         const duration = ((endTime - startTime) / 1000).toFixed(3);
-        copyResult(duration);
+        const result = document.getElementById("result");
+        if (result.value) {
+          try {
+            await navigator.clipboard.writeText(result.value);
+            document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
+          } catch (e) {
+            console.error("Помилка navigator.clipboard:", e);
+            try {
+              result.select();
+              document.execCommand("copy");
+              document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
+            } catch (e2) {
+              document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
+              console.error("Помилка execCommand:", e2);
+            }
+          }
+        } else {
+          document.getElementById("copyMsg").textContent = "Немає даних для копіювання";
+        }
       } catch (e) {
-        document.getElementById("result").value =
-          "❌ Невірний пароль або пошкоджені дані.";
+        document.getElementById("result").value = "❌ Невірний пароль або пошкоджені дані.";
         document.getElementById("copyMsg").textContent = "";
       }
-    }
-
-    function copyResult(durationSeconds = null) {
-      const resultText = document.getElementById("result");
-      navigator.clipboard
-        .writeText(resultText.value)
-        .then(() => {
-          let msg = "✅ Скопійовано!";
-          if (durationSeconds !== null) {
-            msg += ` (${durationSeconds} сек)`;
-          }
-          document.getElementById("copyMsg").textContent = msg;
-        })
-        .catch(() => {
-          document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
-        });
     }
 
     function clearFields() {
