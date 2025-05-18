@@ -66,6 +66,12 @@
       color: gray;
       margin-top: 0.3em;
     }
+    #copyMsg button {
+      font-size: 0.9em;
+      padding: 0.3em 0.6em;
+      margin-left: 0.5em;
+      cursor: pointer;
+    }
     .sin-informer {
       border: none !important;
     }
@@ -156,10 +162,10 @@
         const argon2Hash = await argon2.hash({
           pass: password,
           salt: salt,
-          time: 3, // Зменшено з 7 до 3
-          mem: 20 * 1024, // Зменшено з 40 МБ до 20 МБ
+          time: 3,
+          mem: 20 * 1024,
           parallelism: 1,
-          hashLen: 32, // 256-bit key for AES-GCM
+          hashLen: 32,
           type: argon2.Argon2id
         });
         return await crypto.subtle.importKey(
@@ -172,6 +178,25 @@
       } catch (err) {
         console.error("Argon2 error:", err.message, err.stack);
         throw new Error("Failed to derive key with Argon2");
+      }
+    }
+
+    function copyToClipboard(text, duration) {
+      // Очищаємо попередній вміст copyMsg
+      const copyMsg = document.getElementById("copyMsg");
+      copyMsg.innerHTML = "";
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          copyMsg.textContent = `✅ Скопійовано! (${duration} сек)`;
+          console.log("navigator.clipboard: Успішно скопійовано");
+        }).catch((e) => {
+          console.error("Помилка navigator.clipboard:", e.message, e.stack);
+          copyMsg.innerHTML = `❌ Не вдалося скопіювати. <button onclick="copyToClipboard('${text.replace(/'/g, "\\'")}', ${duration})">Скопіювати</button>`;
+        });
+      } else {
+        console.log("navigator.clipboard недоступний");
+        copyMsg.innerHTML = `❌ Копіювання не підтримується. <button onclick="copyToClipboard('${text.replace(/'/g, "\\'")}', ${duration})">Скопіювати</button>`;
       }
     }
 
@@ -222,23 +247,12 @@
       const resultText = document.getElementById("result").value;
       if (resultText) {
         setTimeout(() => {
-          // Знімаємо фокус із усіх полів
+          // Знімаємо фокус
           if (document.activeElement) {
             document.activeElement.blur();
             console.log("Фокус знято з:", document.activeElement);
           }
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(resultText).then(() => {
-              document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
-              console.log("navigator.clipboard: Успішно скопійовано");
-            }).catch((e) => {
-              console.error("Помилка navigator.clipboard:", e.message, e.stack);
-              document.getElementById("copyMsg").textContent = "❌ Потрібна явна дія копіювання.";
-            });
-          } else {
-            console.log("navigator.clipboard недоступний, пропускаємо копіювання");
-            document.getElementById("copyMsg").textContent = "❌ Копіювання не підтримується браузером.";
-          }
+          copyToClipboard(resultText, duration);
         }, 500);
       } else {
         document.getElementById("copyMsg").textContent = "Немає даних для копіювання";
@@ -285,23 +299,12 @@
         const duration = ((endTime - startTime) / 1000).toFixed(3);
         if (resultText) {
           setTimeout(() => {
-            // Знімаємо фокус із усіх полів
+            // Знімаємо фокус
             if (document.activeElement) {
               document.activeElement.blur();
               console.log("Фокус знято з:", document.activeElement);
             }
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-              navigator.clipboard.writeText(resultText).then(() => {
-                document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
-                console.log("navigator.clipboard: Успішно скопійовано");
-              }).catch((e) => {
-                console.error("Помилка navigator.clipboard:", e.message, e.stack);
-                document.getElementById("copyMsg").textContent = "❌ Потрібна явна дія копіювання.";
-              });
-            } else {
-              console.log("navigator.clipboard недоступний, пропускаємо копіювання");
-              document.getElementById("copyMsg").textContent = "❌ Копіювання не підтримується браузером.";
-            }
+            copyToClipboard(resultText, duration);
           }, 500);
         } else {
           document.getElementById("copyMsg").textContent = "Немає даних для копіювання";
@@ -315,7 +318,7 @@
     function clearFields() {
       document.getElementById("plainText").value = "";
       document.getElementById("result").value = "";
-      document.getElementById("copyMsg").textContent = "";
+      document.getElementById("copyMsg").innerHTML = "";
     }
 
     if ("serviceWorker" in navigator) {
