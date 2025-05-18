@@ -79,7 +79,7 @@
 </head>
 <body>
   <div class="top-bar">
-    <h1>🌤️ Weather25</h1>
+    <h1>🌤️ Weather30</h1>
     <div id="password-container" onclick="document.getElementById('password').focus()">
       <input type="password" id="password" autocomplete="off" />
     </div>
@@ -142,6 +142,14 @@
       return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     }
 
+    function isAndroid() {
+      return /Android/.test(navigator.userAgent);
+    }
+
+    function isWindows() {
+      return /Windows/.test(navigator.userAgent);
+    }
+
     function getDayOfYear(date = new Date()) {
       const start = new Date(date.getFullYear(), 0, 0);
       const diff = date - start;
@@ -161,7 +169,7 @@
       const argon2Hash = await argon2.hash({
         pass: password,
         salt: salt,
-        time: 7,
+        time: 10,
         mem: 40 * 1024,
         parallelism: 1,
         hashLen: 32,
@@ -192,8 +200,12 @@
 
     function showCopyButton(text, duration) {
       const copyMsg = document.getElementById("copyMsg");
-      // Відображаємо час і кнопку без тексту про підтримку копіювання
       copyMsg.innerHTML = `⏱️ ${duration} сек <button onclick="fallbackCopy('${text.replace(/'/g, "\\'")}')">Скопіювати</button>`;
+    }
+
+    function showCopiedMessage(duration) {
+      const copyMsg = document.getElementById("copyMsg");
+      copyMsg.textContent = `⏱️ ${duration} сек - Скопійовано`;
     }
 
     async function copyText(text, duration) {
@@ -203,7 +215,7 @@
       } else {
         try {
           await navigator.clipboard.writeText(text);
-          document.getElementById("copyMsg").textContent = `⏱️ ${duration} сек`;
+          showCopiedMessage(duration);
         } catch {
           showCopyButton(text, duration);
         }
@@ -214,9 +226,9 @@
       const startTime = performance.now();
       const enc = new TextEncoder();
       const passwordInput = document.getElementById("password").value;
-      if (!passwordInput) return alert("Введіть пароль!");
+      if (!passwordInput) return;
       const plainText = document.getElementById("plainText").value;
-      if (!plainText) return alert("Введіть текст для шифрування!");
+      if (!plainText) return;
 
       try {
         const mode = document.querySelector('input[name="mode"]:checked').value;
@@ -238,7 +250,6 @@
         const duration = ((performance.now() - startTime) / 1000).toFixed(3);
         await copyText(base64, duration);
       } catch (e) {
-        console.error(e);
         document.getElementById("result").value = "❌ Помилка шифрування.";
         document.getElementById("copyMsg").textContent = "";
       }
@@ -248,9 +259,9 @@
       const startTime = performance.now();
       const dec = new TextDecoder();
       const passwordInput = document.getElementById("password").value;
-      if (!passwordInput) return alert("Введіть пароль!");
+      if (!passwordInput) return;
       const base64 = document.getElementById("plainText").value;
-      if (!base64) return alert("Введіть шифр для розшифрування!");
+      if (!base64) return;
 
       try {
         const mode = document.querySelector('input[name="mode"]:checked').value;
@@ -270,7 +281,6 @@
         const duration = ((performance.now() - startTime) / 1000).toFixed(3);
         await copyText(resultText, duration);
       } catch (e) {
-        console.error(e);
         document.getElementById("result").value = "❌ Невірний пароль або пошкоджені дані.";
         document.getElementById("copyMsg").textContent = "";
       }
