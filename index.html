@@ -221,24 +221,8 @@
       const duration = ((endTime - startTime) / 1000).toFixed(3);
       const result = document.getElementById("result");
       if (result.value) {
-        try {
-          await navigator.clipboard.writeText(result.value);
-          // Перевірка вмісту буфера (якщо підтримується)
+        setTimeout(() => {
           try {
-            const clipboardContent = await navigator.clipboard.readText();
-            if (clipboardContent === result.value) {
-              document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
-            } else {
-              throw new Error("Clipboard content mismatch");
-            }
-          } catch (e) {
-            // Якщо readText не підтримується, покладаємося на writeText
-            document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
-          }
-        } catch (e) {
-          console.error("Помилка navigator.clipboard:", e);
-          try {
-            // Тимчасово знімаємо readonly для копіювання
             result.removeAttribute("readonly");
             result.focus();
             result.select();
@@ -249,11 +233,21 @@
             } else {
               throw new Error("execCommand failed");
             }
-          } catch (e2) {
-            console.error("Помилка execCommand:", e2);
-            document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
+          } catch (e) {
+            console.error("Помилка execCommand:", e);
+            try {
+              navigator.clipboard.writeText(result.value).then(() => {
+                document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
+              }).catch((e2) => {
+                console.error("Помилка navigator.clipboard:", e2);
+                document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
+              });
+            } catch (e3) {
+              console.error("Помилка резервного копіювання:", e3);
+              document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
+            }
           }
-        }
+        }, 0);
       } else {
         document.getElementById("copyMsg").textContent = "Немає даних для копіювання";
       }
@@ -299,24 +293,8 @@
         const duration = ((endTime - startTime) / 1000).toFixed(3);
         const result = document.getElementById("result");
         if (result.value) {
-          try {
-            await navigator.clipboard.writeText(result.value);
-            // Перевірка вмісту буфера (якщо підтримується)
+          setTimeout(() => {
             try {
-              const clipboardContent = await navigator.clipboard.readText();
-              if (clipboardContent === result.value) {
-                document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
-              } else {
-                throw new Error("Clipboard content mismatch");
-              }
-            } catch (e) {
-              // Якщо readText не підтримується, покладаємося на writeText
-              document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
-            }
-          } catch (e) {
-            console.error("Помилка navigator.clipboard:", e);
-            try {
-              // Тимчасово знімаємо readonly для копіювання
               result.removeAttribute("readonly");
               result.focus();
               result.select();
@@ -327,11 +305,21 @@
               } else {
                 throw new Error("execCommand failed");
               }
-            } catch (e2) {
-              console.error("Помилка execCommand:", e2);
-              document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
+            } catch (e) {
+              console.error("Помилка execCommand:", e);
+              try {
+                navigator.clipboard.writeText(result.value).then(() => {
+                  document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
+                }).catch((e2) => {
+                  console.error("Помилка navigator.clipboard:", e2);
+                  document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
+                });
+              } catch (e3) {
+                console.error("Помилка резервного копіювання:", e3);
+                document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
+              }
             }
-          }
+          }, 0);
         } else {
           document.getElementById("copyMsg").textContent = "Немає даних для копіювання";
         }
