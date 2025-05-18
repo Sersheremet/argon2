@@ -79,7 +79,7 @@
 </head>
 <body>
   <div class="top-bar">
-    <h1>🌤️ Weather23</h1>
+    <h1>🌤️ Weather25</h1>
     <div id="password-container" onclick="document.getElementById('password').focus()">
       <input type="password" id="password" autocomplete="off" />
     </div>
@@ -138,7 +138,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/argon2-browser/1.18.0/argon2-bundled.min.js"></script>
 
   <script>
-    // Визначення, чи iPhone (iOS)
     function isIOS() {
       return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     }
@@ -186,36 +185,27 @@
       textarea.focus();
       textarea.select();
       try {
-        const success = document.execCommand("copy");
-        if (success) {
-          document.getElementById("copyMsg").innerHTML = "✅ Скопійовано!";
-        } else {
-          document.getElementById("copyMsg").innerHTML = "❌ Не вдалося скопіювати.";
-        }
-      } catch (err) {
-        document.getElementById("copyMsg").innerHTML = "❌ Помилка копіювання.";
-      }
+        document.execCommand("copy");
+      } catch {}
       document.body.removeChild(textarea);
     }
 
-    function showCopyButton(text) {
+    function showCopyButton(text, duration) {
       const copyMsg = document.getElementById("copyMsg");
-      copyMsg.innerHTML = `Копіювання не підтримується автоматично. <button onclick="fallbackCopy('${text.replace(/'/g, "\\'")}')">Скопіювати</button>`;
+      // Відображаємо час і кнопку без тексту про підтримку копіювання
+      copyMsg.innerHTML = `⏱️ ${duration} сек <button onclick="fallbackCopy('${text.replace(/'/g, "\\'")}')">Скопіювати</button>`;
     }
 
     async function copyText(text, duration) {
       if (!text) return;
       if (isIOS()) {
-        // iPhone/iPad: показуємо кнопку для ручного копіювання
-        showCopyButton(text);
+        showCopyButton(text, duration);
       } else {
-        // Windows, Android та інші: автоматичне копіювання
         try {
           await navigator.clipboard.writeText(text);
-          document.getElementById("copyMsg").innerHTML = `⏱️ ${duration} сек — Скопійовано!`;
+          document.getElementById("copyMsg").textContent = `⏱️ ${duration} сек`;
         } catch {
-          // Якщо не вдалось, показати кнопку
-          showCopyButton(text);
+          showCopyButton(text, duration);
         }
       }
     }
