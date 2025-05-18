@@ -73,7 +73,7 @@
 </head>
 <body>
   <div class="top-bar">
-    <h1>🌤️ Weather9</h1>
+    <h1>🌤️ Weather10</h1>
     <div id="password-container" onclick="document.getElementById('password').focus()">
       <input type="password" id="password" autocomplete="off" />
     </div>
@@ -223,24 +223,20 @@
       if (result.value) {
         setTimeout(() => {
           try {
-            // Створюємо прихований input для копіювання
-            const tempInput = document.createElement("input");
-            tempInput.style.position = "absolute";
-            tempInput.style.left = "-9999px";
-            tempInput.value = result.value;
-            document.body.appendChild(tempInput);
-            tempInput.focus();
-            tempInput.select();
-            const success = document.execCommand("copy");
-            document.body.removeChild(tempInput);
-            if (success) {
-              document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
-            } else {
-              throw new Error("execCommand failed");
-            }
+            // Створюємо подію копіювання
+            const clipboardData = new DataTransfer();
+            clipboardData.setData("text/plain", result.value);
+            const clipEvent = new ClipboardEvent("copy", {
+              clipboardData: clipboardData,
+              bubbles: true,
+              cancelable: true
+            });
+            document.dispatchEvent(clipEvent);
+            document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
           } catch (e) {
-            console.error("Помилка execCommand:", e);
+            console.error("Помилка ClipboardEvent:", e);
             try {
+              // Резервний метод: navigator.clipboard
               navigator.clipboard.writeText(result.value).then(() => {
                 document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
               }).catch((e2) => {
@@ -252,7 +248,7 @@
               document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
             }
           }
-        }, 0);
+        }, 100); // Збільшена затримка до 100 мс
       } else {
         document.getElementById("copyMsg").textContent = "Немає даних для копіювання";
       }
@@ -300,24 +296,20 @@
         if (result.value) {
           setTimeout(() => {
             try {
-              // Створюємо прихований input для копіювання
-              const tempInput = document.createElement("input");
-              tempInput.style.position = "absolute";
-              tempInput.style.left = "-9999px";
-              tempInput.value = result.value;
-              document.body.appendChild(tempInput);
-              tempInput.focus();
-              tempInput.select();
-              const success = document.execCommand("copy");
-              document.body.removeChild(tempInput);
-              if (success) {
-                document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
-              } else {
-                throw new Error("execCommand failed");
-              }
+              // Створюємо подію копіювання
+              const clipboardData = new DataTransfer();
+              clipboardData.setData("text/plain", result.value);
+              const clipEvent = new ClipboardEvent("copy", {
+                clipboardData: clipboardData,
+                bubbles: true,
+                cancelable: true
+              });
+              document.dispatchEvent(clipEvent);
+              document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
             } catch (e) {
-              console.error("Помилка execCommand:", e);
+              console.error("Помилка ClipboardEvent:", e);
               try {
+                // Резервний метод: navigator.clipboard
                 navigator.clipboard.writeText(result.value).then(() => {
                   document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
                 }).catch((e2) => {
@@ -329,7 +321,7 @@
                 document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
               }
             }
-          }, 0);
+          }, 100); // Збільшена затримка до 100 мс
         } else {
           document.getElementById("copyMsg").textContent = "Немає даних для копіювання";
         }
