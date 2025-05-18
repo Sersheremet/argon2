@@ -73,7 +73,7 @@
 </head>
 <body>
   <div class="top-bar">
-    <h1>🌤️ Weather13</h1>
+    <h1>🌤️ Weather6</h1>
     <div id="password-container" onclick="document.getElementById('password').focus()">
       <input type="password" id="password" autocomplete="off" />
     </div>
@@ -156,21 +156,21 @@
         const argon2Hash = await argon2.hash({
           pass: password,
           salt: salt,
-          time: 7, // кількість ітерацій
-          mem: 40 * 1024, // Пам'ять в KB
+          time: 3, // Зменшено з 7 до 3
+          mem: 20 * 1024, // Зменшено з 40 МБ до 20 МБ
           parallelism: 1,
           hashLen: 32, // 256-bit key for AES-GCM
           type: argon2.Argon2id
         });
         return await crypto.subtle.importKey(
           "raw",
-          argon2Hash.hash, // Use raw hash bytes
+          argon2Hash.hash,
           { name: "AES-GCM", length: 256 },
           false,
           ["encrypt", "decrypt"]
         );
       } catch (err) {
-        console.error("Argon2 error:", err);
+        console.error("Argon2 error:", err.message, err.stack);
         throw new Error("Failed to derive key with Argon2");
       }
     }
@@ -222,55 +222,24 @@
       const resultText = document.getElementById("result").value;
       if (resultText) {
         setTimeout(() => {
+          // Знімаємо фокус із усіх полів
+          if (document.activeElement) {
+            document.activeElement.blur();
+            console.log("Фокус знято з:", document.activeElement);
+          }
           if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(resultText).then(() => {
               document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
+              console.log("navigator.clipboard: Успішно скопійовано");
             }).catch((e) => {
               console.error("Помилка navigator.clipboard:", e.message, e.stack);
-              // Резервний метод: document.execCommand із textarea
-              try {
-                const tempTextarea = document.createElement("textarea");
-                tempTextarea.style.position = "absolute";
-                tempTextarea.style.left = "-9999px";
-                tempTextarea.value = resultText;
-                document.body.appendChild(tempTextarea);
-                tempTextarea.focus();
-                tempTextarea.select();
-                const success = document.execCommand("copy");
-                document.body.removeChild(tempTextarea);
-                if (success) {
-                  document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
-                } else {
-                  throw new Error("execCommand failed");
-                }
-              } catch (e2) {
-                console.error("Помилка execCommand:", e2.message, e2.stack);
-                document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
-              }
+              document.getElementById("copyMsg").textContent = "❌ Потрібна явна дія копіювання.";
             });
           } else {
-            // Резервний метод для старих браузерів
-            try {
-              const tempTextarea = document.createElement("textarea");
-              tempTextarea.style.position = "absolute";
-              tempTextarea.style.left = "-9999px";
-              tempTextarea.value = resultText;
-              document.body.appendChild(tempTextarea);
-              tempTextarea.focus();
-              tempTextarea.select();
-              const success = document.execCommand("copy");
-              document.body.removeChild(tempTextarea);
-              if (success) {
-                document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
-              } else {
-                throw new Error("execCommand failed");
-              }
-            } catch (e3) {
-              console.error("Помилка execCommand:", e3.message, e3.stack);
-              document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
-            }
+            console.log("navigator.clipboard недоступний, пропускаємо копіювання");
+            document.getElementById("copyMsg").textContent = "❌ Копіювання не підтримується браузером.";
           }
-        }, 500); // Затримка 500 мс
+        }, 500);
       } else {
         document.getElementById("copyMsg").textContent = "Немає даних для копіювання";
       }
@@ -316,55 +285,24 @@
         const duration = ((endTime - startTime) / 1000).toFixed(3);
         if (resultText) {
           setTimeout(() => {
+            // Знімаємо фокус із усіх полів
+            if (document.activeElement) {
+              document.activeElement.blur();
+              console.log("Фокус знято з:", document.activeElement);
+            }
             if (navigator.clipboard && navigator.clipboard.writeText) {
               navigator.clipboard.writeText(resultText).then(() => {
                 document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
+                console.log("navigator.clipboard: Успішно скопійовано");
               }).catch((e) => {
                 console.error("Помилка navigator.clipboard:", e.message, e.stack);
-                // Резервний метод: document.execCommand із textarea
-                try {
-                  const tempTextarea = document.createElement("textarea");
-                  tempTextarea.style.position = "absolute";
-                  tempTextarea.style.left = "-9999px";
-                  tempTextarea.value = resultText;
-                  document.body.appendChild(tempTextarea);
-                  tempTextarea.focus();
-                  tempTextarea.select();
-                  const success = document.execCommand("copy");
-                  document.body.removeChild(tempTextarea);
-                  if (success) {
-                    document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
-                  } else {
-                    throw new Error("execCommand failed");
-                  }
-                } catch (e2) {
-                  console.error("Помилка execCommand:", e2.message, e2.stack);
-                  document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
-                }
+                document.getElementById("copyMsg").textContent = "❌ Потрібна явна дія копіювання.";
               });
             } else {
-              // Резервний метод для старих браузерів
-              try {
-                const tempTextarea = document.createElement("textarea");
-                tempTextarea.style.position = "absolute";
-                tempTextarea.style.left = "-9999px";
-                tempTextarea.value = resultText;
-                document.body.appendChild(tempTextarea);
-                tempTextarea.focus();
-                tempTextarea.select();
-                const success = document.execCommand("copy");
-                document.body.removeChild(tempTextarea);
-                if (success) {
-                  document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
-                } else {
-                  throw new Error("execCommand failed");
-                }
-              } catch (e3) {
-                console.error("Помилка execCommand:", e3.message, e3.stack);
-                document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
-              }
+              console.log("navigator.clipboard недоступний, пропускаємо копіювання");
+              document.getElementById("copyMsg").textContent = "❌ Копіювання не підтримується браузером.";
             }
-          }, 500); // Затримка 500 мс
+          }, 500);
         } else {
           document.getElementById("copyMsg").textContent = "Немає даних для копіювання";
         }
