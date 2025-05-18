@@ -79,7 +79,7 @@
 </head>
 <body>
   <div class="top-bar">
-    <h1>🌤️ Weather22</h1>
+    <h1>🌤️ Weather23</h1>
     <div id="password-container" onclick="document.getElementById('password').focus()">
       <input type="password" id="password" autocomplete="off" />
     </div>
@@ -138,6 +138,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/argon2-browser/1.18.0/argon2-bundled.min.js"></script>
 
   <script>
+    // Визначення, чи iPhone (iOS)
+    function isIOS() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    }
+
     function getDayOfYear(date = new Date()) {
       const start = new Date(date.getFullYear(), 0, 0);
       const diff = date - start;
@@ -172,14 +177,7 @@
       );
     }
 
-    function copyToClipboard(text, duration) {
-      const copyMsg = document.getElementById("copyMsg");
-      copyMsg.innerHTML = `⏱️ ${duration} сек <button onclick="fallbackCopy()">Скопіювати</button>`;
-      window._copyText = text;
-    }
-
-    function fallbackCopy() {
-      const text = window._copyText || document.getElementById("result").value;
+    function fallbackCopy(text) {
       const textarea = document.createElement("textarea");
       textarea.value = text;
       textarea.style.position = "fixed";
@@ -200,8 +198,30 @@
       document.body.removeChild(textarea);
     }
 
+    function showCopyButton(text) {
+      const copyMsg = document.getElementById("copyMsg");
+      copyMsg.innerHTML = `Копіювання не підтримується автоматично. <button onclick="fallbackCopy('${text.replace(/'/g, "\\'")}')">Скопіювати</button>`;
+    }
+
+    async function copyText(text, duration) {
+      if (!text) return;
+      if (isIOS()) {
+        // iPhone/iPad: показуємо кнопку для ручного копіювання
+        showCopyButton(text);
+      } else {
+        // Windows, Android та інші: автоматичне копіювання
+        try {
+          await navigator.clipboard.writeText(text);
+          document.getElementById("copyMsg").innerHTML = `⏱️ ${duration} сек — Скопійовано!`;
+        } catch {
+          // Якщо не вдалось, показати кнопку
+          showCopyButton(text);
+        }
+      }
+    }
+
     async function encrypt() {
-      const startTime = performance.now(); // Додано тут
+      const startTime = performance.now();
       const enc = new TextEncoder();
       const passwordInput = document.getElementById("password").value;
       if (!passwordInput) return alert("Введіть пароль!");
@@ -225,7 +245,8 @@
         full.set(new Uint8Array(encrypted), 28);
         const base64 = btoa(String.fromCharCode(...full));
         document.getElementById("result").value = base64;
-        copyToClipboard(base64, ((performance.now() - startTime) / 1000).toFixed(3));
+        const duration = ((performance.now() - startTime) / 1000).toFixed(3);
+        await copyText(base64, duration);
       } catch (e) {
         console.error(e);
         document.getElementById("result").value = "❌ Помилка шифрування.";
@@ -234,7 +255,7 @@
     }
 
     async function decrypt() {
-      const startTime = performance.now(); // Додано тут
+      const startTime = performance.now();
       const dec = new TextDecoder();
       const passwordInput = document.getElementById("password").value;
       if (!passwordInput) return alert("Введіть пароль!");
@@ -256,7 +277,8 @@
         const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, encrypted);
         const resultText = dec.decode(decrypted);
         document.getElementById("result").value = resultText;
-        copyToClipboard(resultText, ((performance.now() - startTime) / 1000).toFixed(3));
+        const duration = ((performance.now() - startTime) / 1000).toFixed(3);
+        await copyText(resultText, duration);
       } catch (e) {
         console.error(e);
         document.getElementById("result").value = "❌ Невірний пароль або пошкоджені дані.";
