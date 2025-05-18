@@ -123,7 +123,7 @@
 
   <div id="buttons-container">
     <button onclick="encrypt()">Вперед</button>
-    <button onclick=" decrypt()">Назад</button>
+    <button onclick="decrypt()">Назад</button>
     <button onclick="clearFields()">Очистити поля</button>
   </div>
 
@@ -221,18 +221,25 @@
       const duration = ((endTime - startTime) / 1000).toFixed(3);
       const result = document.getElementById("result");
       if (result.value) {
+        // Спочатку спробуємо document.execCommand для Safari PWA
         try {
-          await navigator.clipboard.writeText(result.value);
-          document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
+          result.focus();
+          result.select();
+          const success = document.execCommand("copy");
+          if (success) {
+            document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
+          } else {
+            throw new Error("execCommand failed");
+          }
         } catch (e) {
-          console.error("Помилка navigator.clipboard:", e);
+          console.error("Помилка execCommand:", e);
+          // Резервний метод: navigator.clipboard
           try {
-            result.select();
-            document.execCommand("copy");
+            await navigator.clipboard.writeText(result.value);
             document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
           } catch (e2) {
+            console.error("Помилка navigator.clipboard:", e2);
             document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
-            console.error("Помилка execCommand:", e2);
           }
         }
       } else {
@@ -280,18 +287,25 @@
         const duration = ((endTime - startTime) / 1000).toFixed(3);
         const result = document.getElementById("result");
         if (result.value) {
+          // Спочатку спробуємо document.execCommand для Safari PWA
           try {
-            await navigator.clipboard.writeText(result.value);
-            document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
+            result.focus();
+            result.select();
+            const success = document.execCommand("copy");
+            if (success) {
+              document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
+            } else {
+              throw new Error("execCommand failed");
+            }
           } catch (e) {
-            console.error("Помилка navigator.clipboard:", e);
+            console.error("Помилка execCommand:", e);
+            // Резервний метод: navigator.clipboard
             try {
-              result.select();
-              document.execCommand("copy");
+              await navigator.clipboard.writeText(result.value);
               document.getElementById("copyMsg").textContent = `✅ Скопійовано! (${duration} сек)`;
             } catch (e2) {
+              console.error("Помилка navigator.clipboard:", e2);
               document.getElementById("copyMsg").textContent = "❌ Не вдалося скопіювати.";
-              console.error("Помилка execCommand:", e2);
             }
           }
         } else {
