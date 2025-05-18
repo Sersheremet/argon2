@@ -272,4 +272,21 @@
     }
 
     function copyResult(durationSeconds = null) {
-      const resultText = document.getElementBy
+      const resultText = document.getElementById("result").value;
+      if (!resultText) return;
+      navigator.clipboard.writeText(resultText).then(() => {
+        const msg = durationSeconds
+          ? `Результат скопійовано у буфер обміну! Час: ${durationSeconds} с`
+          : "Результат скопійовано у буфер обміну!";
+        document.getElementById("copyMsg").textContent = msg;
+      });
+    }
+
+    function clearFields() {
+      document.getElementById("plainText").value = "";
+      document.getElementById("result").value = "";
+      document.getElementById("copyMsg").textContent = "";
+    }
+  </script>
+</body>
+</html>
