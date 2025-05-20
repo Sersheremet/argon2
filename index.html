@@ -83,6 +83,13 @@
   </style>
 </head>
 <body>
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('✅ Service Worker зареєстрований', reg.scope))
+      .catch(err => console.error('❌ Помилка реєстрації Service Worker:', err));
+  }
+</script>
   <div class="top-bar">
     <h1>🌤️ Weather++</h1>
     <div id="password-container" onclick="document.getElementById('password').focus()">
