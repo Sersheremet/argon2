@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <title>Weather</title>
   <meta name="theme-color" content="#0080ff" />
-  <link rel="manifest" href="manifest.json">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
       font-family: sans-serif;
@@ -16,8 +16,7 @@
       width: 100%;
       height: 140px;
     }
-    input,
-    button {
+    input, button {
       margin: 0.5em 0;
       font-size: 1.2em;
     }
@@ -75,11 +74,17 @@
     .sin-informer {
       border: none !important;
     }
+    .sin-informer__marker {
+    font-size: 17px !important;
+    }
+    .sin-informer__header {
+      font-size: 17px !important;
+    }
   </style>
 </head>
 <body>
   <div class="top-bar">
-    <h1>🌤️ Weather30</h1>
+    <h1>🌤️ Weather+</h1>
     <div id="password-container" onclick="document.getElementById('password').focus()">
       <input type="password" id="password" autocomplete="off" />
     </div>
@@ -134,22 +139,11 @@
   <label for="result">Результат:</label>
   <textarea id="result" readonly></textarea>
   <div id="copyMsg" class="small"></div>
+  <div id="bruteForceTime" class="small" style="margin-top: 0.3em; color: #333;"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/argon2-browser/1.18.0/argon2-bundled.min.js"></script>
 
   <script>
-    function isIOS() {
-      return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    }
-
-    function isAndroid() {
-      return /Android/.test(navigator.userAgent);
-    }
-
-    function isWindows() {
-      return /Windows/.test(navigator.userAgent);
-    }
-
     function getDayOfYear(date = new Date()) {
       const start = new Date(date.getFullYear(), 0, 0);
       const diff = date - start;
@@ -210,15 +204,11 @@
 
     async function copyText(text, duration) {
       if (!text) return;
-      if (isIOS()) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showCopiedMessage(duration);
+      } catch {
         showCopyButton(text, duration);
-      } else {
-        try {
-          await navigator.clipboard.writeText(text);
-          showCopiedMessage(duration);
-        } catch {
-          showCopyButton(text, duration);
-        }
       }
     }
 
@@ -226,15 +216,15 @@
       const startTime = performance.now();
       const enc = new TextEncoder();
       const passwordInput = document.getElementById("password").value;
-      if (!passwordInput) return;
       const plainText = document.getElementById("plainText").value;
-      if (!plainText) return;
+      if (!passwordInput || !plainText) return;
 
       try {
         const mode = document.querySelector('input[name="mode"]:checked').value;
         let realPassword = passwordInput;
         if (mode === "dynamic") {
-          const dayOfYear = getDayOfYear();
+          const currentDate = new Date();
+          const dayOfYear = getDayOfYear(currentDate);
           realPassword += await computeTail(passwordInput, dayOfYear);
         }
         const salt = crypto.getRandomValues(new Uint8Array(16));
@@ -259,29 +249,28 @@
       const startTime = performance.now();
       const dec = new TextDecoder();
       const passwordInput = document.getElementById("password").value;
-      if (!passwordInput) return;
       const base64 = document.getElementById("plainText").value;
-      if (!base64) return;
+      if (!passwordInput || !base64) return;
 
       try {
         const mode = document.querySelector('input[name="mode"]:checked').value;
-        const data = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
-        const salt = data.slice(0, 16);
-        const iv = data.slice(16, 28);
-        const encrypted = data.slice(28);
-
         let realPassword = passwordInput;
         if (mode === "dynamic") {
-          realPassword += await computeTail(passwordInput, getDayOfYear());
+          const currentDate = new Date();
+          const dayOfYear = getDayOfYear(currentDate);
+          realPassword += await computeTail(passwordInput, dayOfYear);
         }
+        const full = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+        const salt = full.slice(0, 16);
+        const iv = full.slice(16, 28);
+        const data = full.slice(28);
         const key = await getKey(realPassword, salt);
-        const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, encrypted);
-        const resultText = dec.decode(decrypted);
-        document.getElementById("result").value = resultText;
+        const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data);
+        document.getElementById("result").value = dec.decode(decrypted);
         const duration = ((performance.now() - startTime) / 1000).toFixed(3);
-        await copyText(resultText, duration);
+        await copyText(dec.decode(decrypted), duration);
       } catch (e) {
-        document.getElementById("result").value = "❌ Невірний пароль або пошкоджені дані.";
+        document.getElementById("result").value = "❌ Помилка дешифрування.";
         document.getElementById("copyMsg").textContent = "";
       }
     }
@@ -289,12 +278,83 @@
     function clearFields() {
       document.getElementById("plainText").value = "";
       document.getElementById("result").value = "";
-      document.getElementById("copyMsg").innerHTML = "";
+      document.getElementById("copyMsg").textContent = "";
     }
 
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("sw.js");
+    function estimateCharsetSize(password) {
+      let charsetSize = 0;
+      const hasLatinUpper = /[A-Z]/.test(password);
+      const hasLatinLower = /[a-z]/.test(password);
+      const hasCyrillic = /[А-Яа-яЁёЇїІіЄєҐґ]/.test(password);
+      const hasDigits = /\d/.test(password);
+      const hasSpecial = /[^A-Za-zА-Яа-яЁёЇїІіЄєҐґ\d]/.test(password);
+
+      if (hasLatinUpper) charsetSize += 26;
+      if (hasLatinLower) charsetSize += 26;
+      if (hasCyrillic) charsetSize += 66;
+      if (hasDigits) charsetSize += 10;
+      if (hasSpecial) charsetSize += 32;
+      return charsetSize;
     }
+
+    function formatDuration(seconds) {
+      if (seconds < 60) return seconds.toFixed(2) + " сек";
+      const minutes = seconds / 60;
+      if (minutes < 60) return minutes.toFixed(2) + " хв";
+      const hours = minutes / 60;
+      if (hours < 24) return hours.toFixed(2) + " год";
+      const days = hours / 24;
+      if (days < 365) return days.toFixed(2) + " дн";
+      const years = days / 365;
+      if (years < 1000000) return Math.floor(years).toLocaleString("uk") + " р";
+      return `~10^${Math.floor(Math.log10(seconds))} сек`;
+    }
+
+    function estimateBruteForceTime(password) {
+      const charsetSize = estimateCharsetSize(password);
+      const length = password.length;
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+
+      if (charsetSize === 0) return "Немає символів для аналізу";
+
+      try {
+        let combinations = BigInt(charsetSize) ** BigInt(length);
+        if (mode === "dynamic") {
+          combinations *= BigInt(365); // Враховуємо 365 варіантів хвоста
+        }
+        const attemptsPerSec = BigInt(800000); // 8×10^5 спроб/сек (8 RTX 5090)
+
+        if (combinations < attemptsPerSec) return "< 1 сек";
+
+        const secondsBigInt = combinations / attemptsPerSec;
+        const maxSafe = BigInt(Number.MAX_SAFE_INTEGER);
+
+        if (secondsBigInt <= maxSafe) {
+          const seconds = Number(secondsBigInt);
+          return formatDuration(seconds);
+        } else {
+          return `~10^${secondsBigInt.toString().length - 1} сек`;
+        }
+      } catch {
+        return "Занадто великий пароль для оцінки";
+      }
+    }
+
+    function updateBruteForceTime() {
+      const password = document.getElementById("password").value;
+      const bfTimeEl = document.getElementById("bruteForceTime");
+      if (!password) {
+        bfTimeEl.textContent = "";
+        return;
+      }
+      bfTimeEl.textContent = "⏳ Оцінка часу перебору: " + estimateBruteForceTime(password);
+    }
+
+    document.getElementById("password").addEventListener("input", updateBruteForceTime);
+    document.querySelectorAll('input[name="mode"]').forEach(radio => {
+      radio.addEventListener("change", updateBruteForceTime);
+    });
+    updateBruteForceTime();
   </script>
 </body>
 </html>
