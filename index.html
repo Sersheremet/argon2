@@ -96,11 +96,14 @@
 </head>
 <body>
 
-    <script>
-    let clickCount = 0;
-    const revealThreshold = 7;
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  let clickCount = 0;
+  const revealThreshold = 7;
 
-    document.getElementById("secretTrigger").addEventListener("click", () => {
+  const trigger = document.getElementById("secretTrigger");
+  if (trigger) {
+    trigger.addEventListener("click", () => {
       clickCount++;
       if (clickCount === revealThreshold) {
         document.getElementById("password-container").style.display = "block";
@@ -109,7 +112,10 @@
         document.getElementById("bruteForceTime").style.display = "block";
       }
     });
-  </script>
+  }
+});
+</script>
+
 
   
   <script>
@@ -120,7 +126,7 @@
   }
 </script>
   <div class="top-bar">
-    <h1>🌤️ Weather++3</h1>
+    <h1>🌤️ Weather++4</h1>
     <div id="password-container" onclick="document.getElementById('password').focus()">
       <input type="password" id="password" autocomplete="off" />
     </div>
