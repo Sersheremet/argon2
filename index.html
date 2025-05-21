@@ -75,10 +75,16 @@
       border: none !important;
     }
     .sin-informer__marker {
-    font-size: 17px !important;
+      font-size: 17px !important;
     }
     .sin-informer__header {
       font-size: 17px !important;
+    }
+    #result {
+      font-size: 0.9em;
+      color: #333;
+      margin-top: 0.3em;
+      word-break: break-all;
     }
   </style>
 </head>
@@ -144,7 +150,7 @@
   </div>
 
   <label for="result">Результат:</label>
-  <textarea id="result" readonly></textarea>
+  <div id="result"></div>
   <div id="copyMsg" class="small"></div>
   <div id="bruteForceTime" class="small" style="margin-top: 0.3em; color: #333;"></div>
 
@@ -170,8 +176,8 @@
       const argon2Hash = await argon2.hash({
         pass: password,
         salt: salt,
-        time: 10, // 10...50  50...100
-        mem: 64 * 1024, //64...128  128...256(512)
+        time: 10,
+        mem: 64 * 1024,
         parallelism: 1,
         hashLen: 32,
         type: argon2.Argon2id
@@ -243,11 +249,11 @@
         full.set(iv, 16);
         full.set(new Uint8Array(encrypted), 28);
         const base64 = btoa(String.fromCharCode(...full));
-        document.getElementById("result").value = base64;
+        document.getElementById("result").textContent = base64;
         const duration = ((performance.now() - startTime) / 1000).toFixed(3);
         await copyText(base64, duration);
       } catch (e) {
-        document.getElementById("result").value = "❌ Помилка шифрування.";
+        document.getElementById("result").textContent = "❌ Помилка шифрування.";
         document.getElementById("copyMsg").textContent = "";
       }
     }
@@ -273,18 +279,18 @@
         const data = full.slice(28);
         const key = await getKey(realPassword, salt);
         const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data);
-        document.getElementById("result").value = dec.decode(decrypted);
+        document.getElementById("result").textContent = dec.decode(decrypted);
         const duration = ((performance.now() - startTime) / 1000).toFixed(3);
         await copyText(dec.decode(decrypted), duration);
       } catch (e) {
-        document.getElementById("result").value = "❌ Помилка дешифрування.";
+        document.getElementById("result").textContent = "❌ Помилка дешифрування.";
         document.getElementById("copyMsg").textContent = "";
       }
     }
 
     function clearFields() {
       document.getElementById("plainText").value = "";
-      document.getElementById("result").value = "";
+      document.getElementById("result").textContent = "";
       document.getElementById("copyMsg").textContent = "";
     }
 
@@ -327,9 +333,9 @@
       try {
         let combinations = BigInt(charsetSize) ** BigInt(length);
         if (mode === "dynamic") {
-          combinations *= BigInt(365); // Враховуємо 365 варіантів хвоста
+          combinations *= BigInt(365);
         }
-        const attemptsPerSec = BigInt(800000); // 8×10^5 спроб/сек (8 RTX 5090)
+        const attemptsPerSec = BigInt(800000);
 
         if (combinations < attemptsPerSec) return "< 1 сек";
 
