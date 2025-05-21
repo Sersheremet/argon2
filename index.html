@@ -95,6 +95,23 @@
   </style>
 </head>
 <body>
+
+    <script>
+    let clickCount = 0;
+    const revealThreshold = 7;
+
+    document.getElementById("secretTrigger").addEventListener("click", () => {
+      clickCount++;
+      if (clickCount === revealThreshold) {
+        document.getElementById("password-container").style.display = "block";
+        document.getElementById("plainText").style.display = "block";
+        document.getElementById("buttons-container").style.display = "flex";
+        document.getElementById("bruteForceTime").style.display = "block";
+      }
+    });
+  </script>
+
+  
   <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
@@ -162,20 +179,7 @@
 
   <script src="libs/argon2-bundled.min.js"></script>
 
-    <script>
-    let clickCount = 0;
-    const revealThreshold = 7;
 
-    document.getElementById("secretTrigger").addEventListener("click", () => {
-      clickCount++;
-      if (clickCount === revealThreshold) {
-        document.getElementById("password-container").style.display = "block";
-        document.getElementById("plainText").style.display = "block";
-        document.getElementById("buttons-container").style.display = "flex";
-        document.getElementById("bruteForceTime").style.display = "block";
-      }
-    });
-  </script>
   
   <script>
     function getDayOfYear(date = new Date()) {
