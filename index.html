@@ -86,6 +86,12 @@
       margin-top: 0.3em;
       word-break: break-all;
     }
+    #password-container,
+    #plainText,
+    #buttons-container,
+    #mode-container{
+     display: none;
+    }
   </style>
 </head>
 <body>
@@ -156,6 +162,21 @@
 
   <script src="libs/argon2-bundled.min.js"></script>
 
+    <script>
+    let clickCount = 0;
+    const revealThreshold = 7;
+
+    document.getElementById("secretTrigger").addEventListener("click", () => {
+      clickCount++;
+      if (clickCount === revealThreshold) {
+        document.getElementById("password-container").style.display = "block";
+        document.getElementById("plainText").style.display = "block";
+        document.getElementById("buttons-container").style.display = "flex";
+        document.getElementById("bruteForceTime").style.display = "block";
+      }
+    });
+  </script>
+  
   <script>
     function getDayOfYear(date = new Date()) {
       const start = new Date(date.getFullYear(), 0, 0);
