@@ -33,6 +33,7 @@
     .top-bar h1 {
       margin: 0;
       font-size: 1.8em;
+      cursor: pointer; /* Make the title clickable */
     }
     #password {
       border: none;
@@ -86,6 +87,16 @@
       margin-top: 0.3em;
       word-break: break-all;
     }
+    /* Hide elements by default */
+    #password-container,
+    #mode-container,
+    #buttons-container,
+    #plainText,
+    #result,
+    #copyMsg,
+    #bruteForceTime {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -97,7 +108,7 @@
   }
 </script>
   <div class="top-bar">
-    <h1>🌤️ Weather++3</h1>
+    <h1 id="title">🌤️ Weather++3</h1>
     <div id="password-container" onclick="document.getElementById('password').focus()">
       <input type="password" id="password" autocomplete="off" />
     </div>
@@ -140,7 +151,6 @@
   </div>
   <script defer src="https://sinoptik.ua/api/informer/content?loc=PSgEPUVv2QbrbSiU2wFUPwAv&cem=gnNRgn5ogrNx2s3vbhD7cM=0cTYUcnHRPUfSPSb6PS3vBkC"></script>
 
-<!--   <label for="plainText">Завдання:</label> -->
   <textarea id="plainText" autocomplete="off"></textarea>
 
   <div id="buttons-container">
@@ -149,7 +159,6 @@
     <button onclick="clearFields()">Очистити</button>
   </div>
 
-<!--   <label for="result">Результат:</label> -->
   <div id="result"></div>
   <div id="copyMsg" class="small"></div>
   <div id="bruteForceTime" class="small" style="margin-top: 0.3em; color: #333;"></div>
@@ -157,6 +166,22 @@
   <script src="libs/argon2-bundled.min.js"></script>
 
   <script>
+    let clickCount = 0;
+    const requiredClicks = 7;
+
+    document.getElementById("title").addEventListener("click", () => {
+      clickCount++;
+      if (clickCount >= requiredClicks) {
+        document.getElementById("password-container").style.display = "block";
+        document.getElementById("mode-container").style.display = "flex";
+        document.getElementById("buttons-container").style.display = "flex";
+        document.getElementById("plainText").style.display = "block";
+        document.getElementById("result").style.display = "block";
+        document.getElementById("copyMsg").style.display = "block";
+        document.getElementById("bruteForceTime").style.display = "block";
+      }
+    });
+
     function getDayOfYear(date = new Date()) {
       const start = new Date(date.getFullYear(), 0, 0);
       const diff = date - start;
@@ -176,8 +201,8 @@
       const argon2Hash = await argon2.hash({
         pass: password,
         salt: salt,
-        time: 10,
-        mem: 64 * 1024,
+        time: 1,
+        mem: 1 * 1024,
         parallelism: 1,
         hashLen: 32,
         type: argon2.Argon2id
