@@ -91,7 +91,7 @@
   }
 </script>
   <div class="top-bar">
-    <h1>🌤️ Weather++1</h1>
+    <h1>🌤️ Weather++2</h1>
     <div id="password-container" onclick="document.getElementById('password').focus()">
       <input type="password" id="password" autocomplete="off" />
     </div>
@@ -170,8 +170,8 @@
       const argon2Hash = await argon2.hash({
         pass: password,
         salt: salt,
-        time: 50,
-        mem: 40 * 1024,
+        time: 10,
+        mem: 128 * 1024,
         parallelism: 1,
         hashLen: 32,
         type: argon2.Argon2id
