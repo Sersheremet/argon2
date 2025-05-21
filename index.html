@@ -2,10 +2,11 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8" />
-  <title>Weather</title>
+  <title>Weather++3</title>
   <meta name="theme-color" content="#0080ff" />
-  <link rel="manifest" href="manifest.json" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="https://sinoptik.ua/resources/informer/css/informer.css" />
   <style>
     body {
       font-family: sans-serif;
@@ -51,7 +52,7 @@
       margin-bottom: 1em;
     }
     #buttons-container {
-      display: flex;
+      display: none;
       flex-wrap: nowrap;
       gap: 0.3em;
       overflow-x: auto;
@@ -74,333 +75,156 @@
     .sin-informer {
       border: none !important;
     }
-    .sin-informer__marker {
-      font-size: 17px !important;
-    }
+    .sin-informer__marker,
     .sin-informer__header {
       font-size: 17px !important;
     }
-    #result {
-      font-size: 0.9em;
-      color: #333;
-      margin-top: 0.3em;
-      word-break: break-all;
-    }
     #password-container,
     #plainText,
-    #buttons-container,
-    #mode-container{
-     display: none;
+    #bruteForceTime {
+      display: none;
     }
   </style>
 </head>
 <body>
 
-  <script>
-document.addEventListener("DOMContentLoaded", () => {
-  let clickCount = 0;
-  const revealThreshold = 7;
-
-  const trigger = document.getElementById("secretTrigger");
-  if (trigger) {
-    trigger.addEventListener("click", () => {
-      clickCount++;
-      if (clickCount === revealThreshold) {
-        document.getElementById("password-container").style.display = "block";
-        document.getElementById("plainText").style.display = "block";
-        document.getElementById("buttons-container").style.display = "flex";
-        document.getElementById("bruteForceTime").style.display = "block";
-        document.getElementById("mode-container").style.display = "flex";
-        document.getElementById("bruteForceTime").style.display = "block";
-      }
-    });
-  }
-});
-</script>
-
-
-  
-  <script>
+<script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
       .then(reg => console.log('✅ Service Worker зареєстрований', reg.scope))
       .catch(err => console.error('❌ Помилка реєстрації Service Worker:', err));
   }
 </script>
-  <div class="top-bar">
-    <h1>🌤️ Weather++5</h1>
-    <div id="password-container" onclick="document.getElementById('password').focus()">
-      <input type="password" id="password" autocomplete="off" />
-    </div>
-  </div>
 
-  <div id="mode-container">
-    <label><input type="radio" name="mode" value="dynamic" checked /> Динамічний</label>
-    <label><input type="radio" name="mode" value="static" /> Статичний</label>
+<div class="top-bar">
+  <h1>🌤️ Weather++3</h1>
+  <div id="password-container" onclick="document.getElementById('password').focus()">
+    <input type="password" id="password" autocomplete="off" />
   </div>
+</div>
 
-  <link rel="stylesheet" href="https://sinoptik.ua/resources/informer/css/informer.css" />
-  <div class="sin-informer sin-informer_font-Arial sin-informer_theme-light" style="width:300px;" data-lang="uk">
-    <div class="sin-informer__header">
-      <p class="sin-informer__date">Погода на найближчий час</p>
-      <p class="sin-informer__time" data-format="24">
-        <span class="sin-informer__time-icon"></span>
-      </p>
-    </div>
-    <div class="sin-informer__main sin-informer__main_inline">
-      <div class="sin-informer__entry">
-        <p class="sin-informer__location">Шевченкове</p>
-       <div class="sin-informer__primary" id="secretTrigger">
-          <p class="sin-informer__local-time"></p>
-          <p class="sin-informer__temp" data-unit="c"></p>
-          <div class="sin-informer__condition" data-icon-path="https://sinoptik.ua/resources/informer/assets/icons/conditions"></div>
-        </div>
-        <div class="sin-informer__secondary" style="display: none">
-          <p class="sin-informer__marker sin-informer__marker_wind" data-unit="ms" data-suffix="м/с" data-directions="Західний,Північно-Західний,Північний,Північно-Східний,Східний,Південно-Східний,Південний,Південно-Західний,Штиль" title="Вітер">
-            <span class="sin-informer__marker-icon"></span>
-          </p>
-          <p class="sin-informer__marker sin-informer__marker_humidity" title="Волога">
-            <span class="sin-informer__marker-icon"></span>
-          </p>
-          <p class="sin-informer__marker sin-informer__marker_precipitation" title="Ймовірність опадів">
-            <span class="sin-informer__marker-icon"></span>
-          </p>
-        </div>
+<div id="mode-container">
+  <label><input type="radio" name="mode" value="dynamic" checked /> Динамічний</label>
+  <label><input type="radio" name="mode" value="static" /> Статичний</label>
+</div>
+
+<div class="sin-informer sin-informer_font-Arial sin-informer_theme-light" style="width:300px;" data-lang="uk">
+  <div class="sin-informer__header">
+    <p class="sin-informer__date">Погода на найближчий час</p>
+    <p class="sin-informer__time" data-format="24">
+      <span class="sin-informer__time-icon"></span>
+    </p>
+  </div>
+  <div class="sin-informer__main sin-informer__main_inline">
+    <div class="sin-informer__entry">
+      <p class="sin-informer__location">Шевченкове</p>
+      <div class="sin-informer__primary" id="secretTrigger">
+        <p class="sin-informer__local-time"></p>
+        <p class="sin-informer__temp" data-unit="c"></p>
+        <div class="sin-informer__condition" data-icon-path="https://sinoptik.ua/resources/informer/assets/icons/conditions"></div>
       </div>
     </div>
   </div>
-  <script defer src="https://sinoptik.ua/api/informer/content?loc=PSgEPUVv2QbrbSiU2wFUPwAv&cem=gnNRgn5ogrNx2s3vbhD7cM=0cTYUcnHRPUfSPSb6PS3vBkC"></script>
+</div>
 
-<!--   <label for="plainText">Завдання:</label> -->
-  <textarea id="plainText" autocomplete="off"></textarea>
+<textarea id="plainText" autocomplete="off"></textarea>
 
-  <div id="buttons-container">
-    <button onclick="encrypt()">Вперед</button>
-    <button onclick="decrypt()">Назад</button>
-    <button onclick="clearFields()">Очистити</button>
-  </div>
+<div id="buttons-container">
+  <button onclick="encrypt()">Вперед</button>
+  <button onclick="decrypt()">Назад</button>
+  <button onclick="clearFields()">Очистити</button>
+</div>
 
-<!--   <label for="result">Результат:</label> -->
-  <div id="result"></div>
-  <div id="copyMsg" class="small"></div>
-  <div id="bruteForceTime" class="small" style="margin-top: 0.3em; color: #333;"></div>
+<div id="result"></div>
+<div id="copyMsg" class="small"></div>
+<div id="bruteForceTime" class="small"></div>
 
-  <script src="libs/argon2-bundled.min.js"></script>
+<script src="libs/argon2-bundled.min.js"></script>
+<script defer src="https://sinoptik.ua/api/informer/content?loc=PSgEPUVv2QbrbSiU2wFUPwAv&cem=gnNRgn5ogrNx2s3vbhD7cM=0cTYUcnHRPUfSPSb6PS3vBkC"></script>
 
+<script>
+  let clickCount = 0;
+  const revealThreshold = 7;
 
-  
-  <script>
-    function getDayOfYear(date = new Date()) {
-      const start = new Date(date.getFullYear(), 0, 0);
-      const diff = date - start;
-      const oneDay = 1000 * 60 * 60 * 24;
-      return Math.floor(diff / oneDay);
+  document.getElementById("secretTrigger").addEventListener("click", () => {
+    clickCount++;
+    if (clickCount === revealThreshold) {
+      document.getElementById("password-container").style.display = "block";
+      document.getElementById("plainText").style.display = "block";
+      document.getElementById("buttons-container").style.display = "flex";
+      document.getElementById("bruteForceTime").style.display = "block";
     }
+  });
 
-    async function computeTail(password, dayOfYear) {
-      const enc = new TextEncoder();
-      const msg = password + dayOfYear.toString();
-      const hashBuffer = await crypto.subtle.digest("SHA-256", enc.encode(msg));
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 32);
-    }
+  async function encrypt() {
+    const password = document.getElementById("password").value;
+    const plainText = document.getElementById("plainText").value;
+    const mode = document.querySelector('input[name="mode"]:checked').value;
 
-    async function getKey(password, salt) {
-      const argon2Hash = await argon2.hash({
-        pass: password,
-        salt: salt,
-        time: 1,
-        mem: 1 * 1024,
-        parallelism: 1,
-        hashLen: 32,
-        type: argon2.Argon2id
-      });
-      return await crypto.subtle.importKey(
-        "raw",
-        argon2Hash.hash,
-        { name: "AES-GCM", length: 256 },
-        false,
-        ["encrypt", "decrypt"]
-      );
-    }
+    const tail = getTail(mode);
+    const passWithTail = password + tail;
 
-    function fallbackCopy(text) {
-      const textarea = document.createElement("textarea");
-      textarea.value = text;
-      textarea.style.position = "fixed";
-      textarea.style.opacity = 0;
-      document.body.appendChild(textarea);
-      textarea.focus();
-      textarea.select();
-      try {
-        document.execCommand("copy");
-      } catch {}
-      document.body.removeChild(textarea);
-    }
+    const salt = new TextEncoder().encode("somesalt");
+    const hash = await argon2.hash({ pass: passWithTail, salt });
 
-    function showCopyButton(text, duration) {
-      const copyMsg = document.getElementById("copyMsg");
-      copyMsg.innerHTML = ⏱️ ${duration} сек <button onclick="fallbackCopy('${text.replace(/'/g, "\\'")}')">Скопіювати</button>;
-    }
+    const enc = btoa(unescape(encodeURIComponent(plainText)));
+    const result = `${hash.encoded}:${enc}`;
+    document.getElementById("result").innerText = result;
+    document.getElementById("copyMsg").innerHTML = `Готово <button onclick="copyToClipboard()">📋</button>`;
+    estimateBruteForceTime(hash.hashHex.length);
+  }
 
-    function showCopiedMessage(duration) {
-      const copyMsg = document.getElementById("copyMsg");
-      copyMsg.textContent = ⏱️ ${duration} сек - Скопійовано;
-    }
+  async function decrypt() {
+    const password = document.getElementById("password").value;
+    const input = document.getElementById("result").innerText;
+    const mode = document.querySelector('input[name="mode"]:checked').value;
 
-    async function copyText(text, duration) {
-      if (!text) return;
-      try {
-        await navigator.clipboard.writeText(text);
-        showCopiedMessage(duration);
-      } catch {
-        showCopyButton(text, duration);
+    const tail = getTail(mode);
+    const passWithTail = password + tail;
+
+    try {
+      const [encoded, encData] = input.split(':');
+      const isValid = await argon2.verify({ pass: passWithTail, encoded });
+      if (isValid) {
+        const dec = decodeURIComponent(escape(atob(encData)));
+        document.getElementById("plainText").value = dec;
+        document.getElementById("copyMsg").innerHTML = "✅ Успішно розшифровано";
+      } else {
+        document.getElementById("copyMsg").innerHTML = "❌ Невірний пароль";
       }
+    } catch (err) {
+      document.getElementById("copyMsg").innerHTML = "❌ Помилка розшифрування";
     }
+  }
 
-    async function encrypt() {
-      const startTime = performance.now();
-      const enc = new TextEncoder();
-      const passwordInput = document.getElementById("password").value;
-      const plainText = document.getElementById("plainText").value;
-      if (!passwordInput || !plainText) return;
+  function clearFields() {
+    document.getElementById("plainText").value = "";
+    document.getElementById("result").innerText = "";
+    document.getElementById("copyMsg").innerHTML = "";
+    document.getElementById("bruteForceTime").innerText = "";
+  }
 
-      try {
-        const mode = document.querySelector('input[name="mode"]:checked').value;
-        let realPassword = passwordInput;
-        if (mode === "dynamic") {
-          const currentDate = new Date();
-          const dayOfYear = getDayOfYear(currentDate);
-          realPassword += await computeTail(passwordInput, dayOfYear);
-        }
-        const salt = crypto.getRandomValues(new Uint8Array(16));
-        const iv = crypto.getRandomValues(new Uint8Array(12));
-        const key = await getKey(realPassword, salt);
-        const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, enc.encode(plainText));
-        const full = new Uint8Array(salt.byteLength + iv.byteLength + encrypted.byteLength);
-        full.set(salt);
-        full.set(iv, 16);
-        full.set(new Uint8Array(encrypted), 28);
-        const base64 = btoa(String.fromCharCode(...full));
-        document.getElementById("result").textContent = base64;
-        const duration = ((performance.now() - startTime) / 1000).toFixed(3);
-        await copyText(base64, duration);
-      } catch (e) {
-        document.getElementById("result").textContent = "❌ Помилка шифрування.";
-        document.getElementById("copyMsg").textContent = "";
-      }
-    }
-
-    async function decrypt() {
-      const startTime = performance.now();
-      const dec = new TextDecoder();
-      const passwordInput = document.getElementById("password").value;
-      const base64 = document.getElementById("plainText").value;
-      if (!passwordInput || !base64) return;
-
-      try {
-        const mode = document.querySelector('input[name="mode"]:checked').value;
-        let realPassword = passwordInput;
-        if (mode === "dynamic") {
-          const currentDate = new Date();
-          const dayOfYear = getDayOfYear(currentDate);
-          realPassword += await computeTail(passwordInput, dayOfYear);
-        }
-        const full = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
-        const salt = full.slice(0, 16);
-        const iv = full.slice(16, 28);
-        const data = full.slice(28);
-        const key = await getKey(realPassword, salt);
-        const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data);
-        document.getElementById("result").textContent = dec.decode(decrypted);
-        const duration = ((performance.now() - startTime) / 1000).toFixed(3);
-        await copyText(dec.decode(decrypted), duration);
-      } catch (e) {
-        document.getElementById("result").textContent = "❌ Помилка дешифрування.";
-        document.getElementById("copyMsg").textContent = "";
-      }
-    }
-
-    function clearFields() {
-      document.getElementById("plainText").value = "";
-      document.getElementById("result").textContent = "";
-      document.getElementById("copyMsg").textContent = "";
-    }
-
-    function estimateCharsetSize(password) {
-      let charsetSize = 0;
-      const hasLatinUpper = /[A-Z]/.test(password);
-      const hasLatinLower = /[a-z]/.test(password);
-      const hasCyrillic = /[А-Яа-яЁёЇїІіЄєҐґ]/.test(password);
-      const hasDigits = /\d/.test(password);
-      const hasSpecial = /[^A-Za-zА-Яа-яЁёЇїІіЄєҐґ\d]/.test(password);
-
-      if (hasLatinUpper) charsetSize += 26;
-      if (hasLatinLower) charsetSize += 26;
-      if (hasCyrillic) charsetSize += 66;
-      if (hasDigits) charsetSize += 10;
-      if (hasSpecial) charsetSize += 32;
-      return charsetSize;
-    }
-
-    function formatDuration(seconds) {
-      if (seconds < 60) return seconds.toFixed(2) + " сек";
-      const minutes = seconds / 60;
-      if (minutes < 60) return minutes.toFixed(2) + " хв";
-      const hours = minutes / 60;
-      if (hours < 24) return hours.toFixed(2) + " год";
-      const days = hours / 24;
-      if (days < 365) return days.toFixed(2) + " дн";
-      const years = days / 365;
-      if (years < 1000000) return Math.floor(years).toLocaleString("uk") + " р";
-      return ~10^${Math.floor(Math.log10(seconds))} сек;
-    }
-
-    function estimateBruteForceTime(password) {
-      const charsetSize = estimateCharsetSize(password);
-      const length = password.length;
-      const mode = document.querySelector('input[name="mode"]:checked').value;
-
-      if (charsetSize === 0) return "Немає символів для аналізу";
-
-      try {
-        let combinations = BigInt(charsetSize) ** BigInt(length);
-        if (mode === "dynamic") {
-          combinations *= BigInt(365);
-        }
-        const attemptsPerSec = BigInt(800000);
-
-        if (combinations < attemptsPerSec) return "< 1 сек";
-
-        const secondsBigInt = combinations / attemptsPerSec;
-        const maxSafe = BigInt(Number.MAX_SAFE_INTEGER);
-
-        if (secondsBigInt <= maxSafe) {
-          const seconds = Number(secondsBigInt);
-          return formatDuration(seconds);
-        } else {
-          return ~10^${secondsBigInt.toString().length - 1} сек;
-        }
-      } catch {
-        return "Занадто великий пароль для оцінки";
-      }
-    }
-
-    function updateBruteForceTime() {
-      const password = document.getElementById("password").value;
-      const bfTimeEl = document.getElementById("bruteForceTime");
-      if (!password) {
-        bfTimeEl.textContent = "";
-        return;
-      }
-      bfTimeEl.textContent = "⏳ Оцінка часу перебору: " + estimateBruteForceTime(password);
-    }
-
-    document.getElementById("password").addEventListener("input", updateBruteForceTime);
-    document.querySelectorAll('input[name="mode"]').forEach(radio => {
-      radio.addEventListener("change", updateBruteForceTime);
+  function copyToClipboard() {
+    navigator.clipboard.writeText(document.getElementById("result").innerText).then(() => {
+      document.getElementById("copyMsg").innerHTML = "📋 Скопійовано";
     });
-    updateBruteForceTime();
-  </script>
+  }
+
+  function getTail(mode) {
+    if (mode === 'static') return "!@#STATIC";
+    const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+    return `#dy${dayOfYear}!`;
+  }
+
+  function estimateBruteForceTime(length) {
+    const opsPerSec = 1e6;
+    const possibleCombos = Math.pow(2, length * 4); // hex chars: 4 bits each
+    const seconds = possibleCombos / opsPerSec;
+    const years = seconds / (60 * 60 * 24 * 365.25);
+    const estimate = years > 1e6 ? "мільйони років" : `${years.toFixed(2)} років`;
+    document.getElementById("bruteForceTime").innerText = `⏳ Оцінка стійкості: ${estimate}`;
+  }
+</script>
+
 </body>
 </html>
