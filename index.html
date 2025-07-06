@@ -130,11 +130,6 @@
     <label><input type="radio" name="mode" value="static" /> Статичний</label>
   </div>
 
-  <div style="text-align: center; margin-bottom: 1em;">
-  <label><input type="checkbox" id="superSecure" /> 💪 Супер шифрування</label>
-  <div class="small">Увімкнення може ускладнити розшифрування на слабких пристроях</div>
-</div>
-
   <link rel="stylesheet" href="https://sinoptik.ua/resources/informer/css/informer.css" />
   <div class="sin-informer sin-informer_font-Arial sin-informer_theme-light" style="width:300px;" data-lang="uk">
     <div class="sin-informer__header">
@@ -174,6 +169,10 @@
   </button>
   <input type="file" id="fileInput" style="display:none" />
 
+  <div style="text-align: center; margin-bottom: 1em;">
+  <label><input type="checkbox" id="superSecure" /> 💪 Супер шифрування</label>
+  </div>
+  
   <div id="buttons-container">
     <button onclick="encrypt()">🔒Зашифрувати</button>
     <button onclick="decrypt()">🔓Розшифрувати</button>
