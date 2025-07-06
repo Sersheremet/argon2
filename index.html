@@ -383,9 +383,11 @@
           const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data);
 
           let originalName = fileToProcess.name;
-          if (originalName.endsWith(".enc")) {
-            originalName = originalName.slice(0, -4);
-          }
+if (originalName.endsWith(".enc.txt")) {
+  originalName = originalName.slice(0, -8); // Видаляє .enc.txt
+} else if (originalName.endsWith(".enc")) {
+  originalName = originalName.slice(0, -4); // Видаляє .enc
+}
           saveFile(decrypted, originalName);
           const duration = ((performance.now() - startTime) / 1000).toFixed(3);
           document.getElementById("copyMsg").textContent = `Розшифровано за ${duration} сек. Файл збережено.`;
