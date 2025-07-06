@@ -491,6 +491,7 @@ if (originalName.endsWith(".enc.txt")) {
       const charsetSize = estimateCharsetSize(password);
       const length = password.length;
       const mode = document.querySelector('input[name="mode"]:checked').value;
+      const superSecure = document.getElementById("superSecure")?.checked;
 
       if (charsetSize === 0) return "Немає символів для аналізу";
 
@@ -530,6 +531,7 @@ if (originalName.endsWith(".enc.txt")) {
     document.querySelectorAll('input[name="mode"]').forEach(radio => {
       radio.addEventListener("change", updateBruteForceTime);
     });
+    document.getElementById("superSecure").addEventListener("change", updateBruteForceTime);
     updateBruteForceTime();
   </script>
 </body>
