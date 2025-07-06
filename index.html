@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8" />
-  <title>Weather</title>
+  <title>Погода+</title>
   <meta name="theme-color" content="#0080ff" />
   <link rel="manifest" href="manifest.json" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -38,7 +38,7 @@
       margin: 0;
       font-size: 1.8em;
     }
-    #password {
+/*     #password {
       border: none;
       outline: none;
       background: transparent;
@@ -46,6 +46,16 @@
       caret-color: transparent;
       height: 60px;
       width: 100%;
+    } */
+        #password {
+     border: none;
+     outline: none;
+     background: #fff;
+     color: #000;
+     caret-color: #000;
+     font-size: 30px;
+     height: 60px;
+     width: 100%;
     }
     #mode-container {
       display: flex;
@@ -111,7 +121,7 @@
   }
 </script>
   <div class="top-bar">
-    <h1>🌤️ Weather+</h1>
+    <h1>🌤️ Погода+</h1>
     <div id="password-container" onclick="document.getElementById('password').focus()">
       <input type="password" id="password" autocomplete="off" />
     </div>
@@ -166,7 +176,7 @@
   <div id="copyMsg" class="small"></div>
   <div id="bruteForceTime" class="small" style="margin-top: 0.3em; color: #333;"></div>
 
-  <script src="libs/argon2-bundled.min.js"></script>
+  <script src="js/argon2-bundled.min.js"></script>
 
   <script>
     let clickCount = 0;
