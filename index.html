@@ -168,16 +168,16 @@
     Вибрати файл
   </button>
   <input type="file" id="fileInput" style="display:none" />
-
+       
+<div id="superSecureContainer" style="display: none; text-align: left; margin-bottom: 1em;">
+  <label><input type="checkbox" id="superSecure" /> 💪 Супер шифрування</label>
+</div>
 
   
   <div id="buttons-container">
     <button onclick="encrypt()">🔒Зашифрувати</button>
     <button onclick="decrypt()">🔓Розшифрувати</button>
     <button onclick="clearFields()">🧹Очистити</button>
-      <div style="text-align: left; margin-bottom: 1em;">
-  <label><input type="checkbox" id="superSecure" /> 💪 Супер шифрування</label>
-  </div>
   </div>
 
   <div id="result"></div>
@@ -203,6 +203,7 @@
         document.getElementById("bruteForceTime").style.display = "block";
         document.getElementById("fileLabel").style.display = "inline-block";
         document.getElementById("fileInput").style.display = "none"; // файл інпут залишається прихованим
+        document.getElementById("superSecureContainer").style.display = "block";
       }
     });
 
