@@ -115,7 +115,7 @@
     }
   </script>
   <div class="top-bar">
-    <h1 id="title">🌤️ Погода+</h1>
+    <h1 id="mainTitle">🌤️ Погода+</h1>
     <div id="password-container" onclick="document.getElementById('password').focus()">
       <input type="password" id="password" autocomplete="off" />
     </div>
@@ -182,7 +182,7 @@
     const requiredClicks = 7;
     let fileToProcess = null;
 
-    document.getElementById("title").addEventListener("click", () => {
+    document.getElementById("mainTitle").addEventListener("click", () => {
       clickCount++;
       if (clickCount >= requiredClicks) {
         document.getElementById("password-container").style.display = "block";
