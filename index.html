@@ -357,7 +357,7 @@
 
       if (!passwordInput) return alert("Введіть пароль!");
 
-      if (fileToProcess && fileToProcess.name.endsWith(".enc")) {
+      if (fileToProcess) {
         // Розшифровка файлу
         try {
           const arrayBuffer = await fileToProcess.arrayBuffer();
