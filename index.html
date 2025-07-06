@@ -242,12 +242,16 @@
     }
 
     async function getKey(password, salt) {
+      const superSecure = document.getElementById("superSecure")?.checked;
+      const timeCost = superSecure ? 20 : 10;
+      const memCost = superSecure ? 128 * 1024 : 40 * 1024;
+      const parallelismCost = superSecure ? 4 : 1;
       const argon2Hash = await argon2.hash({
         pass: password,
         salt: salt,
-        time: 10, // 10...50   50...100
-        mem: 40 * 1024, // 64...128   128...256 (512)
-        parallelism: 1,
+        time: timeCost, // 10...50   50...100
+        mem: memCost, // 64...128   128...256 (512)
+        parallelism: parallelismCost, // 1...4
         hashLen: 32,
         type: argon2.Argon2id
       });
