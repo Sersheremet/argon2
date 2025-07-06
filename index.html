@@ -62,12 +62,14 @@
       gap: 0.3em;
       overflow-x: auto;
     }
-    #buttons-container button {
-      flex: 1 1 auto;
-      min-width: 80px;
-      font-size: 0.95em;
-      padding: 0.4em 0.5em;
-    }
+#buttons-container button {
+  flex: 1 1 auto;
+  min-width: 80px;
+  font-size: 0.9em;
+  padding: 0.4em 0.6em;
+  text-align: center;
+  line-height: 1.2;
+}
     .small {
       font-size: 0.9em;
       color: gray;
@@ -168,9 +170,9 @@
   <input type="file" id="fileInput" style="display:none" />
 
   <div id="buttons-container">
-    <button onclick="encrypt()">Зашифрувати</button>
-    <button onclick="decrypt()">Розшифрувати</button>
-    <button onclick="clearFields()">Очистити</button>
+    <button onclick="encrypt()">🔒Зашифрувати</button>
+    <button onclick="decrypt()">🔓Розшифрувати</button>
+    <button onclick="clearFields()">🧹Очистити</button>
   </div>
 
   <div id="result"></div>
