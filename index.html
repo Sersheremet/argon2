@@ -264,38 +264,66 @@ if ('serviceWorker' in navigator) {
 
   // --- Твої початкові функції encrypt, decrypt, clearFields залишаю без змін ---
 
-  async function encrypt() {
+async function encryptFile() {
+  try {
     const startTime = performance.now();
-    const enc = new TextEncoder();
     const passwordInput = document.getElementById("password").value;
-    const plainText = document.getElementById("plainText").value;
-    if (!passwordInput || !plainText) return;
-
-    try {
-      const mode = document.querySelector('input[name="mode"]:checked').value;
-      let realPassword = passwordInput;
-      if (mode === "dynamic") {
-        const currentDate = new Date();
-        const dayOfYear = getDayOfYear(currentDate);
-        realPassword += await computeTail(passwordInput, dayOfYear);
-      }
-      const salt = crypto.getRandomValues(new Uint8Array(16));
-      const iv = crypto.getRandomValues(new Uint8Array(12));
-      const key = await getKey(realPassword, salt);
-      const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, enc.encode(plainText));
-      const full = new Uint8Array(salt.byteLength + iv.byteLength + encrypted.byteLength);
-      full.set(salt);
-      full.set(iv, 16);
-      full.set(new Uint8Array(encrypted), 28);
-      const base64 = btoa(String.fromCharCode(...full));
-      document.getElementById("result").textContent = base64;
-      const duration = ((performance.now() - startTime) / 1000).toFixed(3);
-      await copyText(base64, duration);
-    } catch (e) {
-      document.getElementById("result").textContent = "❌ Помилка шифрування.";
-      document.getElementById("copyMsg").textContent = "";
+    const base64Text = document.getElementById("plainText").value;
+    if (!passwordInput || !base64Text || !loadedFileName) {
+      alert("Вкажіть пароль, завантажте файл та переконайтесь, що поле з файлом заповнене.");
+      return;
     }
+
+    const mode = document.querySelector('input[name="mode"]:checked').value;
+    let realPassword = passwordInput;
+    if (mode === "dynamic") {
+      const currentDate = new Date();
+      const dayOfYear = getDayOfYear(currentDate);
+      realPassword += await computeTail(passwordInput, dayOfYear);
+    }
+
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const key = await getKey(realPassword, salt);
+
+    const ext = loadedFileName.split('.').pop() || "";
+    const enc = new TextEncoder();
+    const extBytes = enc.encode(ext);
+    if (extBytes.length > 255) {
+      alert("Розширення файлу занадто довге.");
+      return;
+    }
+
+    const fileBytes = Uint8Array.from(atob(base64Text), c => c.charCodeAt(0));
+    const combined = new Uint8Array(1 + extBytes.length + fileBytes.length);
+    combined[0] = extBytes.length;
+    combined.set(extBytes, 1);
+    combined.set(fileBytes, 1 + extBytes.length);
+
+    console.log("realPassword:", realPassword);
+    console.log("salt:", salt);
+    console.log("iv:", iv);
+    console.log("key:", key);
+    console.log("combined length:", combined.length);
+
+    const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, combined);
+    console.log("encrypted length:", encrypted.byteLength);
+
+    const full = new Uint8Array(salt.byteLength + iv.byteLength + encrypted.byteLength);
+    full.set(salt);
+    full.set(iv, 16);
+    full.set(new Uint8Array(encrypted), 28);
+
+    const base64 = btoa(String.fromCharCode(...full));
+    document.getElementById("result").textContent = "Файл зашифровано: " + loadedFileName;
+    const duration = ((performance.now() - startTime) / 1000).toFixed(3);
+    await copyText(base64, duration);
+  } catch (e) {
+    console.error("Error in encryptFile:", e);
+    document.getElementById("result").textContent = "❌ Помилка шифрування файлу.";
+    document.getElementById("copyMsg").textContent = "";
   }
+}
 
   async function decrypt() {
     const startTime = performance.now();
