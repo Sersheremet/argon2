@@ -27,6 +27,7 @@
     button {
       font-size: 1em;
       padding: 0.5em 0.5em;
+      cursor: pointer;
     }
     .top-bar {
       display: flex;
@@ -99,442 +100,422 @@
     #result,
     #copyMsg,
     #bruteForceTime,
-    #fileInput,
-    #fileLabel {
+    #fileLabel,
+    #fileInput {
       display: none;
     }
   </style>
 </head>
 <body>
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('✅ Service Worker зареєстрований', reg.scope))
-      .catch(err => console.error('❌ Помилка реєстрації Service Worker:', err));
-  }
-</script>
-<div class="top-bar">
-  <h1>🌤️ Погода+</h1>
-  <div id="password-container" onclick="document.getElementById('password').focus()">
-    <input type="password" id="password" autocomplete="off" />
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('✅ Service Worker зареєстрований', reg.scope))
+        .catch(err => console.error('❌ Помилка реєстрації Service Worker:', err));
+    }
+  </script>
+  <div class="top-bar">
+    <h1 id="title">🌤️ Погода+</h1>
+    <div id="password-container" onclick="document.getElementById('password').focus()">
+      <input type="password" id="password" autocomplete="off" />
+    </div>
   </div>
-</div>
 
-<div id="mode-container">
-  <label><input type="radio" name="mode" value="dynamic" checked /> Динамічний</label>
-  <label><input type="radio" name="mode" value="static" /> Статичний</label>
-</div>
-
-<link rel="stylesheet" href="https://sinoptik.ua/resources/informer/css/informer.css" />
-<div class="sin-informer sin-informer_font-Arial sin-informer_theme-light" style="width:300px;" data-lang="uk">
-  <div class="sin-informer__header">
-    <p class="sin-informer__date">Погода на найближчий час</p>
-    <p class="sin-informer__time" data-format="24">
-      <span class="sin-informer__time-icon"></span>
-    </p>
+  <div id="mode-container">
+    <label><input type="radio" name="mode" value="dynamic" checked /> Динамічний</label>
+    <label><input type="radio" name="mode" value="static" /> Статичний</label>
   </div>
-  <div class="sin-informer__main sin-informer__main_inline">
-    <div class="sin-informer__entry">
-      <p class="sin-informer__location">Шевченкове</p>
-      <div class="sin-informer__primary"  id="title">
-        <p class="sin-informer__local-time"></p>
-        <p class="sin-informer__temp" data-unit="c"></p>
-        <div class="sin-informer__condition" data-icon-path="https://sinoptik.ua/resources/informer/assets/icons/conditions"></div>
-      </div>
-      <div class="sin-informer__secondary" style="display: none">
-        <p class="sin-informer__marker sin-informer__marker_wind" data-unit="ms" data-suffix="м/с" data-directions="Західний,Північно-Західний,Північний,Північно-Східний,Східний,Південно-Східний,Південний,Південно-Західний,Штиль" title="Вітер">
-          <span class="sin-informer__marker-icon"></span>
-        </p>
-        <p class="sin-informer__marker sin-informer__marker_humidity" title="Волога">
-          <span class="sin-informer__marker-icon"></span>
-        </p>
-        <p class="sin-informer__marker sin-informer__marker_precipitation" title="Ймовірність опадів">
-          <span class="sin-informer__marker-icon"></span>
-        </p>
+
+  <link rel="stylesheet" href="https://sinoptik.ua/resources/informer/css/informer.css" />
+  <div class="sin-informer sin-informer_font-Arial sin-informer_theme-light" style="width:300px;" data-lang="uk">
+    <div class="sin-informer__header">
+      <p class="sin-informer__date">Погода на найближчий час</p>
+      <p class="sin-informer__time" data-format="24">
+        <span class="sin-informer__time-icon"></span>
+      </p>
+    </div>
+    <div class="sin-informer__main sin-informer__main_inline">
+      <div class="sin-informer__entry">
+        <p class="sin-informer__location">Шевченкове</p>
+        <div class="sin-informer__primary" id="title">
+          <p class="sin-informer__local-time"></p>
+          <p class="sin-informer__temp" data-unit="c"></p>
+          <div class="sin-informer__condition" data-icon-path="https://sinoptik.ua/resources/informer/assets/icons/conditions"></div>
+        </div>
+        <div class="sin-informer__secondary" style="display: none">
+          <p class="sin-informer__marker sin-informer__marker_wind" data-unit="ms" data-suffix="м/с" data-directions="Західний,Північно-Західний,Північний,Північно-Східний,Східний,Південно-Східний,Південний,Південно-Західний,Штиль" title="Вітер">
+            <span class="sin-informer__marker-icon"></span>
+          </p>
+          <p class="sin-informer__marker sin-informer__marker_humidity" title="Волога">
+            <span class="sin-informer__marker-icon"></span>
+          </p>
+          <p class="sin-informer__marker sin-informer__marker_precipitation" title="Ймовірність опадів">
+            <span class="sin-informer__marker-icon"></span>
+          </p>
+        </div>
       </div>
     </div>
   </div>
-</div>
-<script defer src="https://sinoptik.ua/api/informer/content?loc=PSgEPUVv2QbrbSiU2wFUPwAv&cem=gnNRgn5ogrNx2s3vbhD7cM=0cTYUcnHRPUfSPSb6PS3vBkC"></script>
+  <script defer src="https://sinoptik.ua/api/informer/content?loc=PSgEPUVv2QbrbSiU2wFUPwAv&cem=gnNRgn5ogrNx2s3vbhD7cM=0cTYUcnHRPUfSPSb6PS3vBkC"></script>
 
-<textarea id="plainText" autocomplete="off"></textarea>
+  <textarea id="plainText" autocomplete="off"></textarea>
 
-<label for="fileInput" id="fileLabel" style="display:none; cursor:pointer; font-size:1.2em; color:#007BFF; text-decoration:underline; margin-bottom: 0.5em; display:block;">
-  Вибрати файл для шифрування / розшифрування
-</label>
-<input type="file" id="fileInput" style="display:none" />
+  <button id="fileLabel" style="font-size: 1.2em; margin-bottom: 0.5em; cursor: pointer;">
+    Вибрати
+  </button>
+  <input type="file" id="fileInput" style="display:none" />
 
-<div id="buttons-container">
-  <button onclick="handleForward()">Вперед</button>
-  <button onclick="handleBack()">Назад</button>
-  <button onclick="clearFields()">Очистити</button>
-</div>
+  <div id="buttons-container">
+    <button onclick="encrypt()">Вперед</button>
+    <button onclick="decrypt()">Назад</button>
+    <button onclick="clearFields()">Очистити</button>
+  </div>
 
-<div id="result"></div>
-<div id="copyMsg" class="small"></div>
-<div id="bruteForceTime" class="small" style="margin-top: 0.3em; color: #333;"></div>
+  <div id="result"></div>
+  <div id="copyMsg" class="small"></div>
+  <div id="bruteForceTime" class="small" style="margin-top: 0.3em; color: #333;"></div>
 
-<script src="libs/argon2-bundled.min.js"></script>
+  <script src="js/argon2-bundled.min.js"></script>
 
-<script>
-  let clickCount = 0;
-  const requiredClicks = 7;
-  let fileToProcess = null;
+  <script>
+    let clickCount = 0;
+    const requiredClicks = 7;
+    let fileToProcess = null;
 
-  document.getElementById("title").addEventListener("click", () => {
-    clickCount++;
-    if (clickCount >= requiredClicks) {
-      document.getElementById("password-container").style.display = "block";
-      document.getElementById("mode-container").style.display = "flex";
-      document.getElementById("buttons-container").style.display = "flex";
-      document.getElementById("plainText").style.display = "block";
-      document.getElementById("result").style.display = "block";
-      document.getElementById("copyMsg").style.display = "block";
-      document.getElementById("bruteForceTime").style.display = "block";
-      document.getElementById("fileLabel").style.display = "block";
-    }
-  });
-
-  const fileInput = document.getElementById("fileInput");
-  const fileLabel = document.getElementById("fileLabel");
-
-  fileLabel.addEventListener("click", () => {
-    fileInput.click();
-  });
-
-  fileInput.addEventListener("change", () => {
-    if (fileInput.files.length > 0) {
-      fileToProcess = fileInput.files[0];
-      document.getElementById("plainText").style.display = "none";
-      document.getElementById("plainText").value = "";
-      document.getElementById("result").textContent = "";
-      document.getElementById("copyMsg").textContent = `Обрано файл: ${fileToProcess.name}`;
-    } else {
-      fileToProcess = null;
-      document.getElementById("plainText").style.display = "block";
-      document.getElementById("copyMsg").textContent = "";
-    }
-  });
-
-  function getDayOfYear(date = new Date()) {
-    const start = new Date(date.getFullYear(), 0, 0);
-    const diff = date - start;
-    const oneDay = 1000 * 60 * 60 * 24;
-    return Math.floor(diff / oneDay);
-  }
-
-  async function computeTail(password, dayOfYear) {
-    const enc = new TextEncoder();
-    const msg = password + dayOfYear.toString();
-    const hashBuffer = await crypto.subtle.digest("SHA-256", enc.encode(msg));
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 32);
-  }
-
-  async function getKey(password, salt) {
-    const argon2Hash = await argon2.hash({
-      pass: password,
-      salt: salt,
-      time: 10,
-      mem: 40 * 1024,
-      parallelism: 1,
-      hashLen: 32,
-      type: argon2.Argon2id
+    document.getElementById("title").addEventListener("click", () => {
+      clickCount++;
+      if (clickCount >= requiredClicks) {
+        document.getElementById("password-container").style.display = "block";
+        document.getElementById("mode-container").style.display = "flex";
+        document.getElementById("buttons-container").style.display = "flex";
+        document.getElementById("plainText").style.display = "block";
+        document.getElementById("result").style.display = "block";
+        document.getElementById("copyMsg").style.display = "block";
+        document.getElementById("bruteForceTime").style.display = "block";
+        document.getElementById("fileLabel").style.display = "inline-block";
+        document.getElementById("fileInput").style.display = "none"; // файл інпут залишається прихованим
+      }
     });
-    return await crypto.subtle.importKey(
-      "raw",
-      argon2Hash.hash,
-      { name: "AES-GCM", length: 256 },
-      false,
-      ["encrypt", "decrypt"]
-    );
-  }
 
-  function fallbackCopy(text) {
-    const textarea = document.createElement("textarea");
-    textarea.value = text;
-    textarea.style.position = "fixed";
-    textarea.style.opacity = 0;
-    document.body.appendChild(textarea);
-    textarea.focus();
-    textarea.select();
-    try {
-      document.execCommand("copy");
-    } catch {}
-    document.body.removeChild(textarea);
-  }
+    const fileInput = document.getElementById("fileInput");
+    const fileLabel = document.getElementById("fileLabel");
 
-  function showCopyButton(text, duration) {
-    const copyMsg = document.getElementById("copyMsg");
-    copyMsg.innerHTML = `⏱️ ${duration} сек <button onclick="fallbackCopy('${text.replace(/'/g, "\\'")}')">Скопіювати</button>`;
-  }
+    fileLabel.addEventListener("click", () => {
+      fileInput.click();
+    });
 
-  function showCopiedMessage(duration) {
-    const copyMsg = document.getElementById("copyMsg");
-    copyMsg.textContent = `⏱️ ${duration} сек - Скопійовано`;
-  }
-
-  async function copyText(text, duration) {
-    if (!text) return;
-    try {
-      await navigator.clipboard.writeText(text);
-      showCopiedMessage(duration);
-    } catch {
-      showCopyButton(text, duration);
-    }
-  }
-
-  async function handleForward() {
-    if (fileToProcess) {
-      await encryptFile(fileToProcess);
-    } else {
-      await encrypt();
-    }
-  }
-
-  async function handleBack() {
-    if (fileToProcess && fileToProcess.name.endsWith(".enc")) {
-      await decryptFile(fileToProcess);
-    } else {
-      await decrypt();
-    }
-  }
-
-  async function encrypt() {
-    const startTime = performance.now();
-    const enc = new TextEncoder();
-    const passwordInput = document.getElementById("password").value;
-    const plainText = document.getElementById("plainText").value;
-    if (!passwordInput || !plainText) return;
-
-    try {
-      const mode = document.querySelector('input[name="mode"]:checked').value;
-      let realPassword = passwordInput;
-      if (mode === "dynamic") {
-        const currentDate = new Date();
-        const dayOfYear = getDayOfYear(currentDate);
-        realPassword += await computeTail(passwordInput, dayOfYear);
-      }
-      const salt = crypto.getRandomValues(new Uint8Array(16));
-      const iv = crypto.getRandomValues(new Uint8Array(12));
-      const key = await getKey(realPassword, salt);
-      const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, enc.encode(plainText));
-      const full = new Uint8Array(salt.byteLength + iv.byteLength + encrypted.byteLength);
-      full.set(salt);
-      full.set(iv, 16);
-      full.set(new Uint8Array(encrypted), 28);
-      const base64 = btoa(String.fromCharCode(...full));
-      document.getElementById("result").textContent = base64;
-      const duration = ((performance.now() - startTime) / 1000).toFixed(3);
-      await copyText(base64, duration);
-    } catch (e) {
-      document.getElementById("result").textContent = "❌ Помилка шифрування.";
-      document.getElementById("copyMsg").textContent = "";
-    }
-  }
-
-  async function encryptFile(file) {
-    const startTime = performance.now();
-    const passwordInput = document.getElementById("password").value;
-    if (!passwordInput) return alert("Введіть пароль!");
-
-    try {
-      const arrayBuffer = await file.arrayBuffer();
-      const mode = document.querySelector('input[name="mode"]:checked').value;
-      let realPassword = passwordInput;
-      if (mode === "dynamic") {
-        const currentDate = new Date();
-        const dayOfYear = getDayOfYear(currentDate);
-        realPassword += await computeTail(passwordInput, dayOfYear);
-      }
-      const salt = crypto.getRandomValues(new Uint8Array(16));
-      const iv = crypto.getRandomValues(new Uint8Array(12));
-      const key = await getKey(realPassword, salt);
-      const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, arrayBuffer);
-      const full = new Uint8Array(salt.byteLength + iv.byteLength + encrypted.byteLength);
-      full.set(salt);
-      full.set(iv, 16);
-      full.set(new Uint8Array(encrypted), 28);
-
-      // Збереження зашифрованого файлу поруч з оригіналом, додаємо ".enc"
-      saveFile(full.buffer, file.name + ".enc");
-
-      const duration = ((performance.now() - startTime) / 1000).toFixed(3);
-      document.getElementById("copyMsg").textContent = `Зашифровано за ${duration} сек. Файл збережено.`;
-      document.getElementById("result").textContent = "";
-    } catch (e) {
-      alert("Помилка шифрування файлу.");
-    }
-  }
-
-  async function decrypt() {
-    const startTime = performance.now();
-    const dec = new TextDecoder();
-    const passwordInput = document.getElementById("password").value;
-    const base64 = document.getElementById("plainText").value;
-    if (!passwordInput || !base64) return;
-
-    try {
-      const mode = document.querySelector('input[name="mode"]:checked').value;
-      let realPassword = passwordInput;
-      if (mode === "dynamic") {
-        const currentDate = new Date();
-        const dayOfYear = getDayOfYear(currentDate);
-        realPassword += await computeTail(passwordInput, dayOfYear);
-      }
-      const full = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
-      const salt = full.slice(0, 16);
-      const iv = full.slice(16, 28);
-      const data = full.slice(28);
-      const key = await getKey(realPassword, salt);
-      const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data);
-      document.getElementById("result").textContent = dec.decode(decrypted);
-      const duration = ((performance.now() - startTime) / 1000).toFixed(3);
-      await copyText(dec.decode(decrypted), duration);
-    } catch (e) {
-      document.getElementById("result").textContent = "❌ Помилка дешифрування.";
-      document.getElementById("copyMsg").textContent = "";
-    }
-  }
-
-  async function decryptFile(file) {
-    const startTime = performance.now();
-    const passwordInput = document.getElementById("password").value;
-    if (!passwordInput) return alert("Введіть пароль!");
-
-    try {
-      const arrayBuffer = await file.arrayBuffer();
-      const full = new Uint8Array(arrayBuffer);
-      if (full.length < 28) throw new Error("Файл надто малий.");
-
-      const salt = full.slice(0, 16);
-      const iv = full.slice(16, 28);
-      const data = full.slice(28);
-
-      const mode = document.querySelector('input[name="mode"]:checked').value;
-      let realPassword = passwordInput;
-      if (mode === "dynamic") {
-        const currentDate = new Date();
-        const dayOfYear = getDayOfYear(currentDate);
-        realPassword += await computeTail(passwordInput, dayOfYear);
-      }
-
-      const key = await getKey(realPassword, salt);
-      const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data);
-
-      // Збереження розшифрованого файлу без ".enc" в кінці
-      let originalName = file.name;
-      if (originalName.endsWith(".enc")) {
-        originalName = originalName.slice(0, -4);
-      }
-
-      saveFile(decrypted, originalName);
-
-      const duration = ((performance.now() - startTime) / 1000).toFixed(3);
-      document.getElementById("copyMsg").textContent = `Розшифровано за ${duration} сек. Файл збережено.`;
-      document.getElementById("result").textContent = "";
-    } catch (e) {
-      alert("Помилка дешифрування файлу.");
-    }
-  }
-
-  function saveFile(buffer, filename) {
-    const blob = new Blob([buffer]);
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 100);
-  }
-
-  function clearFields() {
-    document.getElementById("plainText").value = "";
-    document.getElementById("result").textContent = "";
-    document.getElementById("copyMsg").textContent = "";
-    document.getElementById("fileInput").value = "";
-    fileToProcess = null;
-    document.getElementById("plainText").style.display = "block";
-  }
-
-  function estimateCharsetSize(password) {
-    let charsetSize = 0;
-    const hasLatinUpper = /[A-Z]/.test(password);
-    const hasLatinLower = /[a-z]/.test(password);
-    const hasCyrillic = /[А-Яа-яЁёЇїІіЄєҐґ]/.test(password);
-    const hasDigits = /\d/.test(password);
-    const hasSpecial = /[^A-Za-zА-Яа-яЁёЇїІіЄєҐґ\d]/.test(password);
-
-    if (hasLatinUpper) charsetSize += 26;
-    if (hasLatinLower) charsetSize += 26;
-    if (hasCyrillic) charsetSize += 66;
-    if (hasDigits) charsetSize += 10;
-    if (hasSpecial) charsetSize += 32;
-    return charsetSize;
-  }
-
-  function formatDuration(seconds) {
-    if (seconds < 60) return seconds.toFixed(2) + " сек";
-    const minutes = seconds / 60;
-    if (minutes < 60) return minutes.toFixed(2) + " хв";
-    const hours = minutes / 60;
-    if (hours < 24) return hours.toFixed(2) + " год";
-    const days = hours / 24;
-    if (days < 365) return days.toFixed(2) + " дн";
-    const years = days / 365;
-    if (years < 1000000) return Math.floor(years).toLocaleString("uk") + " р";
-    return `~10^${Math.floor(Math.log10(seconds))} сек`;
-  }
-
-  function estimateBruteForceTime(password) {
-    const charsetSize = estimateCharsetSize(password);
-    const length = password.length;
-    const mode = document.querySelector('input[name="mode"]:checked').value;
-
-    if (charsetSize === 0) return "Немає символів для аналізу";
-
-    try {
-      let combinations = BigInt(charsetSize) ** BigInt(length);
-      if (mode === "dynamic") {
-        combinations *= BigInt(365);
-      }
-      const attemptsPerSec = BigInt(800000);
-
-      if (combinations < attemptsPerSec) return "< 1 сек";
-
-      const secondsBigInt = combinations / attemptsPerSec;
-      const maxSafe = BigInt(Number.MAX_SAFE_INTEGER);
-
-      if (secondsBigInt <= maxSafe) {
-        const seconds = Number(secondsBigInt);
-        return formatDuration(seconds);
+    fileInput.addEventListener("change", () => {
+      if (fileInput.files.length > 0) {
+        fileToProcess = fileInput.files[0];
+        document.getElementById("plainText").style.display = "none";
+        document.getElementById("plainText").value = "";
+        document.getElementById("result").textContent = "";
+        document.getElementById("copyMsg").textContent = `Обрано файл: ${fileToProcess.name}`;
       } else {
-        return `~10^${secondsBigInt.toString().length - 1} сек`;
+        fileToProcess = null;
+        document.getElementById("plainText").style.display = "block";
+        document.getElementById("copyMsg").textContent = "";
       }
-    } catch {
-      return "Занадто великий пароль для оцінки";
-    }
-  }
+    });
 
-  function updateBruteForceTime() {
-    const password = document.getElementById("password").value;
-    const bfTimeEl = document.getElementById("bruteForceTime");
-    if (!password) {
-      bfTimeEl.textContent = "";
-      return;
+    function getDayOfYear(date = new Date()) {
+      const start = new Date(date.getFullYear(), 0, 0);
+      const diff = date - start;
+      const oneDay = 1000 * 60 * 60 * 24;
+      return Math.floor(diff / oneDay);
     }
-    bfTimeEl.textContent = "⏳ Оцінка часу перебору: " + estimateBruteForceTime(password);
-  }
 
-  document.getElementById("password").addEventListener("input", updateBruteForceTime);
-  document.querySelectorAll('input[name="mode"]').forEach(radio => {
-    radio.addEventListener("change", updateBruteForceTime);
-  });
-  updateBruteForceTime();
-</script>
+    async function computeTail(password, dayOfYear) {
+      const enc = new TextEncoder();
+      const msg = password + dayOfYear.toString();
+      const hashBuffer = await crypto.subtle.digest("SHA-256", enc.encode(msg));
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 32);
+    }
+
+    async function getKey(password, salt) {
+      const argon2Hash = await argon2.hash({
+        pass: password,
+        salt: salt,
+        time: 10,
+        mem: 40 * 1024,
+        parallelism: 1,
+        hashLen: 32,
+        type: argon2.Argon2id
+      });
+      return await crypto.subtle.importKey(
+        "raw",
+        argon2Hash.hash,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt", "decrypt"]
+      );
+    }
+
+    function fallbackCopy(text) {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = 0;
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      try {
+        document.execCommand("copy");
+      } catch {}
+      document.body.removeChild(textarea);
+    }
+
+    function showCopyButton(text, duration) {
+      const copyMsg = document.getElementById("copyMsg");
+      copyMsg.innerHTML = `⏱️ ${duration} сек <button onclick="fallbackCopy('${text.replace(/'/g, "\\'")}')">Скопіювати</button>`;
+    }
+
+    function showCopiedMessage(duration) {
+      const copyMsg = document.getElementById("copyMsg");
+      copyMsg.textContent = `⏱️ ${duration} сек - Скопійовано`;
+    }
+
+    async function copyText(text, duration) {
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        showCopiedMessage(duration);
+      } catch {
+        showCopyButton(text, duration);
+      }
+    }
+
+    async function encrypt() {
+      const startTime = performance.now();
+      const passwordInput = document.getElementById("password").value;
+      if (!passwordInput) return alert("Введіть пароль!");
+
+      if (fileToProcess) {
+        // Шифруємо файл
+        try {
+          const arrayBuffer = await fileToProcess.arrayBuffer();
+          const mode = document.querySelector('input[name="mode"]:checked').value;
+          let realPassword = passwordInput;
+          if (mode === "dynamic") {
+            const currentDate = new Date();
+            const dayOfYear = getDayOfYear(currentDate);
+            realPassword += await computeTail(passwordInput, dayOfYear);
+          }
+          const salt = crypto.getRandomValues(new Uint8Array(16));
+          const iv = crypto.getRandomValues(new Uint8Array(12));
+          const key = await getKey(realPassword, salt);
+          const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, arrayBuffer);
+          const full = new Uint8Array(salt.byteLength + iv.byteLength + encrypted.byteLength);
+          full.set(salt);
+          full.set(iv, 16);
+          full.set(new Uint8Array(encrypted), 28);
+
+          saveFile(full.buffer, fileToProcess.name + ".enc");
+          const duration = ((performance.now() - startTime) / 1000).toFixed(3);
+          document.getElementById("copyMsg").textContent = `Зашифровано за ${duration} сек. Файл збережено.`;
+          document.getElementById("result").textContent = "";
+        } catch {
+          alert("Помилка шифрування файлу.");
+        }
+      } else {
+        // Шифруємо текст
+        const enc = new TextEncoder();
+        const plainText = document.getElementById("plainText").value;
+        if (!plainText) return alert("Введіть текст для шифрування!");
+
+        try {
+          const mode = document.querySelector('input[name="mode"]:checked').value;
+          let realPassword = passwordInput;
+          if (mode === "dynamic") {
+            const currentDate = new Date();
+            const dayOfYear = getDayOfYear(currentDate);
+            realPassword += await computeTail(passwordInput, dayOfYear);
+          }
+          const salt = crypto.getRandomValues(new Uint8Array(16));
+          const iv = crypto.getRandomValues(new Uint8Array(12));
+          const key = await getKey(realPassword, salt);
+          const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, enc.encode(plainText));
+          const full = new Uint8Array(salt.byteLength + iv.byteLength + encrypted.byteLength);
+          full.set(salt);
+          full.set(iv, 16);
+          full.set(new Uint8Array(encrypted), 28);
+          const base64 = btoa(String.fromCharCode(...full));
+          document.getElementById("result").textContent = base64;
+          const duration = ((performance.now() - startTime) / 1000).toFixed(3);
+          await copyText(base64, duration);
+        } catch {
+          document.getElementById("result").textContent = "❌ Помилка шифрування.";
+          document.getElementById("copyMsg").textContent = "";
+        }
+      }
+    }
+
+    async function decrypt() {
+      const startTime = performance.now();
+      const passwordInput = document.getElementById("password").value;
+
+      if (!passwordInput) return alert("Введіть пароль!");
+
+      if (fileToProcess && fileToProcess.name.endsWith(".enc")) {
+        // Розшифровка файлу
+        try {
+          const arrayBuffer = await fileToProcess.arrayBuffer();
+          const full = new Uint8Array(arrayBuffer);
+          if (full.length < 28) throw new Error("Файл надто малий.");
+
+          const salt = full.slice(0, 16);
+          const iv = full.slice(16, 28);
+          const data = full.slice(28);
+
+          const mode = document.querySelector('input[name="mode"]:checked').value;
+          let realPassword = passwordInput;
+          if (mode === "dynamic") {
+            const currentDate = new Date();
+            const dayOfYear = getDayOfYear(currentDate);
+            realPassword += await computeTail(passwordInput, dayOfYear);
+          }
+          const key = await getKey(realPassword, salt);
+          const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data);
+
+          let originalName = fileToProcess.name;
+          if (originalName.endsWith(".enc")) {
+            originalName = originalName.slice(0, -4);
+          }
+          saveFile(decrypted, originalName);
+          const duration = ((performance.now() - startTime) / 1000).toFixed(3);
+          document.getElementById("copyMsg").textContent = `Розшифровано за ${duration} сек. Файл збережено.`;
+          document.getElementById("result").textContent = "";
+        } catch {
+          alert("Помилка дешифрування файлу.");
+        }
+      } else {
+        // Розшифровка тексту
+        const base64 = document.getElementById("plainText").value;
+        if (!base64) return alert("Введіть текст для розшифрування!");
+
+        try {
+          const dec = new TextDecoder();
+          const mode = document.querySelector('input[name="mode"]:checked').value;
+          let realPassword = passwordInput;
+          if (mode === "dynamic") {
+            const currentDate = new Date();
+            const dayOfYear = getDayOfYear(currentDate);
+            realPassword += await computeTail(passwordInput, dayOfYear);
+          }
+          const full = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+          const salt = full.slice(0, 16);
+          const iv = full.slice(16, 28);
+          const data = full.slice(28);
+          const key = await getKey(realPassword, salt);
+          const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data);
+          document.getElementById("result").textContent = dec.decode(decrypted);
+          const duration = ((performance.now() - startTime) / 1000).toFixed(3);
+          await copyText(dec.decode(decrypted), duration);
+        } catch {
+          document.getElementById("result").textContent = "❌ Помилка дешифрування.";
+          document.getElementById("copyMsg").textContent = "";
+        }
+      }
+    }
+
+    function saveFile(buffer, filename) {
+      const blob = new Blob([buffer]);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 0);
+    }
+
+    function clearFields() {
+      fileToProcess = null;
+      document.getElementById("plainText").value = "";
+      document.getElementById("plainText").style.display = "block";
+      document.getElementById("result").textContent = "";
+      document.getElementById("copyMsg").textContent = "";
+      document.getElementById("fileInput").value = "";
+    }
+
+    function estimateCharsetSize(password) {
+      let charsetSize = 0;
+      const hasLatinUpper = /[A-Z]/.test(password);
+      const hasLatinLower = /[a-z]/.test(password);
+      const hasCyrillic = /[А-Яа-яЁёЇїІіЄєҐґ]/.test(password);
+      const hasDigits = /\d/.test(password);
+      const hasSpecial = /[^A-Za-zА-Яа-яЁёЇїІіЄєҐґ\d]/.test(password);
+
+      if (hasLatinUpper) charsetSize += 26;
+      if (hasLatinLower) charsetSize += 26;
+      if (hasCyrillic) charsetSize += 66;
+      if (hasDigits) charsetSize += 10;
+      if (hasSpecial) charsetSize += 32;
+      return charsetSize;
+    }
+
+    function formatDuration(seconds) {
+      if (seconds < 60) return seconds.toFixed(2) + " сек";
+      const minutes = seconds / 60;
+      if (minutes < 60) return minutes.toFixed(2) + " хв";
+      const hours = minutes / 60;
+      if (hours < 24) return hours.toFixed(2) + " год";
+      const days = hours / 24;
+      if (days < 365) return days.toFixed(2) + " дн";
+      const years = days / 365;
+      if (years < 1000000) return Math.floor(years).toLocaleString("uk") + " р";
+      return `~10^${Math.floor(Math.log10(seconds))} сек`;
+    }
+
+    function estimateBruteForceTime(password) {
+      const charsetSize = estimateCharsetSize(password);
+      const length = password.length;
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+
+      if (charsetSize === 0) return "Немає символів для аналізу";
+
+      try {
+        let combinations = BigInt(charsetSize) ** BigInt(length);
+        if (mode === "dynamic") {
+          combinations *= BigInt(365);
+        }
+        const attemptsPerSec = BigInt(800000);
+
+        if (combinations < attemptsPerSec) return "< 1 сек";
+
+        const secondsBigInt = combinations / attemptsPerSec;
+        const maxSafe = BigInt(Number.MAX_SAFE_INTEGER);
+
+        if (secondsBigInt <= maxSafe) {
+          const seconds = Number(secondsBigInt);
+          return formatDuration(seconds);
+        } else {
+          return `~10^${secondsBigInt.toString().length - 1} сек`;
+        }
+      } catch {
+        return "Занадто великий пароль для оцінки";
+      }
+    }
+
+    function updateBruteForceTime() {
+      const password = document.getElementById("password").value;
+      const bfTimeEl = document.getElementById("bruteForceTime");
+      if (!password) {
+        bfTimeEl.textContent = "";
+        return;
+      }
+      bfTimeEl.textContent = "⏳ Оцінка часу перебору: " + estimateBruteForceTime(password);
+    }
+
+    document.getElementById("password").addEventListener("input", updateBruteForceTime);
+    document.querySelectorAll('input[name="mode"]').forEach(radio => {
+      radio.addEventListener("change", updateBruteForceTime);
+    });
+    updateBruteForceTime();
+  </script>
 </body>
 </html>
