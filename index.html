@@ -499,8 +499,7 @@ if (originalName.endsWith(".enc.txt")) {
         if (mode === "dynamic") {
           combinations *= BigInt(365);
         }
-        const attemptsPerSec = BigInt(800000);
-
+        const attemptsPerSec = superSecure ? BigInt(80000) : BigInt(800000);
         if (combinations < attemptsPerSec) return "< 1 сек";
 
         const secondsBigInt = combinations / attemptsPerSec;
